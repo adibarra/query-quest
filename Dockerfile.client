@@ -1,0 +1,23 @@
+# @author: adibarra (Alec Ibarra)
+# @description: Dockerfile to build and run client
+
+FROM node:alpine AS builder
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+WORKDIR /app
+COPY . .
+
+RUN apk --no-cache add git
+RUN corepack enable
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
+RUN pnpm run build
+
+
+FROM adibarra/nginx-static:latest
+
+COPY nginx.conf /usr/local/nginx/conf/nginx.conf
+COPY --from=builder /app/packages/client/dist /srv
+
+CMD ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;"]

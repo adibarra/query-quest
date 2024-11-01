@@ -1,0 +1,146 @@
+{
+  "cSpell.words": [
+    "adibarra",
+    "ahmadalli",
+    "amcharts",
+    "antd",
+    "antfu",
+    "Arjun",
+    "Attributify",
+    "azuretools",
+    "charliermarsh",
+    "chartdiv",
+    "cirolosapio",
+    "composables",
+    "corepack",
+    "csstools",
+    "dbaeumer",
+    "demi",
+    "Destructurable",
+    "devcontainer",
+    "devcontainers",
+    "dicebear",
+    "dotenv",
+    "eamodio",
+    "ecmel",
+    "excalidraw",
+    "fastapi",
+    "fuzzysort",
+    "getconn",
+    "Ibarra",
+    "iconify",
+    "intlify",
+    "ionicons",
+    "johnsoncodehk",
+    "kohler",
+    "leaderboard",
+    "lokalise",
+    "mhutchie",
+    "micnncim",
+    "mutantdino",
+    "naumovs",
+    "nocheck",
+    "noopener",
+    "noopenner",
+    "nprogress",
+    "nvmrc",
+    "openapi",
+    "Pausable",
+    "pgcrypto",
+    "pinia",
+    "plpgsql",
+    "pomdtr",
+    "popleft",
+    "popselect",
+    "pseudocode",
+    "psycopg",
+    "pulltorefreshjs",
+    "putconn",
+    "pycache",
+    "pydantic",
+    "queryquest",
+    "resourcemonitor",
+    "seedrandom",
+    "Shiki",
+    "shikijs",
+    "sider",
+    "tabler",
+    "tabout",
+    "taze",
+    "TIMESTAMPTZ",
+    "transpiling",
+    "Triggerable",
+    "typecheck",
+    "unhead",
+    "unocss",
+    "unplugin",
+    "uvicorn",
+    "venv",
+    "vicons",
+    "virtualenv",
+    "VITE",
+    "vitesse",
+    "vueuse",
+    "webfont"
+  ],
+
+  // Disable the default formatter, use eslint instead
+  "prettier.enable": false,
+  "editor.formatOnSave": false,
+
+  // Auto fix
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "never"
+  },
+
+  // Silent the stylistic rules in you IDE, but still auto fix them
+  "eslint.rules.customizations": [
+    { "rule": "style/*", "severity": "off" },
+    { "rule": "format/*", "severity": "off" },
+    { "rule": "*-indent", "severity": "off" },
+    { "rule": "*-spacing", "severity": "off" },
+    { "rule": "*-spaces", "severity": "off" },
+    { "rule": "*-order", "severity": "off" },
+    { "rule": "*-dangle", "severity": "off" },
+    { "rule": "*-newline", "severity": "off" },
+    { "rule": "*quotes", "severity": "off" },
+    { "rule": "*semi", "severity": "off" }
+  ],
+
+  // Enable eslint for all supported languages
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "vue",
+    "html",
+    "markdown",
+    "json",
+    "jsonc",
+    "yaml",
+    "toml"
+  ],
+
+  // Python settings
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+
+  // Color highlighting
+  "color-highlight.markerType": "dot-before",
+
+  // i18n-ally
+  "i18n-ally.enabledFrameworks": ["vue"],
+  "i18n-ally.localesPaths": [
+    "packages/client/locales"
+  ],
+  "i18n-ally.keystyle": "nested",
+  "remote.localPortHost": "allInterfaces"
+}

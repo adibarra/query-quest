@@ -1,0 +1,14 @@
+.idea/
+.yarn/
+.npm/
+node_modules/
+cache/
+logs/
+
+.DS_Store
+*:Zone.Identifier
+
+.pnp.*
+.eslintcache
+.env*
+!.env.example

@@ -1,0 +1,51 @@
+/**
+ * @author: adibarra (Alec Ibarra)
+ * @description: Configuration file for the development container
+ */
+
+{
+  "name": "queryquest",
+  "image": "mcr.microsoft.com/devcontainers/base:jammy",
+  "workspaceFolder": "/workspaces/queryquest",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "nodeGypDependencies": true,
+      "version": "lts",
+      "nvmVersion": "latest"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "latest"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ahmadalli.vscode-nginx-conf",
+        "antfu.goto-alias",
+        "antfu.iconify",
+        "antfu.unocss",
+        "charliermarsh.ruff",
+        "christian-kohler.path-intellisense",
+        "csstools.postcss",
+        "dbaeumer.vscode-eslint",
+        "ecmel.vscode-html-css",
+        "editorconfig.editorconfig",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "johnsoncodehk.vscode-tsconfig-helper",
+        "lokalise.i18n-ally",
+        "ms-azuretools.vscode-docker",
+        "pomdtr.excalidraw-editor",
+        "streetsidesoftware.code-spell-checker",
+        "vue.volar"
+      ]
+    }
+  },
+  "portsAttributes": {
+    "3000": { "label": "Production" },
+    "3333": { "label": "Development - Frontend" },
+    "3332": { "label": "Development - Backend" }
+  },
+  "postCreateCommand": ".devcontainer/postCreateCommand.sh",
+  "postStartCommand": ".devcontainer/postStartCommand.sh"
+}

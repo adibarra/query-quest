@@ -1,0 +1,31 @@
+{
+  "name": "queryquest",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.12.3",
+  "description": "CS.4347 Project: Query Quest - A trivia game",
+  "contributors": [
+    "adibarra <github@adibarra.com> (https://adibarra.com)"
+  ],
+  "scripts": {
+    "build": "pnpm --parallel --color run build",
+    "clean": "pnpm --parallel run clean",
+    "clean:all": "pnpm --parallel run clean:all && rm -rf node_modules/ .pnpm-store/",
+    "dev": "pnpm -r run clean && pnpm --parallel --color run dev",
+    "dev:client": "pnpm -r run clean && pnpm --parallel --color --filter client run dev",
+    "dev:server": "pnpm -r run clean && pnpm --parallel --color --filter server run dev",
+    "lint": "pnpm --parallel --color run lint; eslint . --cache; exit 0",
+    "lint:fix": "pnpm --parallel --color run lint:fix; eslint . --fix --cache; exit 0",
+    "preview": "pnpm -r run clean && pnpm --parallel --color run preview",
+    "taze": "taze -r -I",
+    "test": "pnpm --parallel --color run test",
+    "typecheck": "pnpm --parallel run typecheck"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^3.8.0",
+    "eslint": "^9.13.0",
+    "eslint-plugin-format": "^0.1.2",
+    "taze": "^0.18.0"
+  }
+}
