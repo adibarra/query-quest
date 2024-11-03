@@ -1,6 +1,7 @@
 # @author: adibarra (Alec Ibarra)
 # @description: Database class for handling database interactions
 
+import os
 import psycopg2
 from psycopg2 import pool
 
@@ -44,13 +45,19 @@ class Database(
                     1, 20, SERVICE_POSTGRES_URI
                 )
                 print("Connected. Initializing...", flush=True)
-
                 conn = cls.instance.connectionPool.getconn()
                 with conn.cursor() as cursor:
-                    # for each file in /sql directory, execute the sql
-                    with open("sql/init.sql", "r") as file:
-                        cursor.execute(file.read())
+                    # Load and execute sql in create.sql
+                    with open(os.path.join(os.path.dirname(__file__), 'sql', 'create.sql'), 'r') as file:
+                        sql_script = file.read()
+                        cursor.execute(sql_script)
 
+                    # Load and execute sql in load.sql
+                    with open(os.path.join(os.path.dirname(__file__), 'sql', 'load.sql'), 'r') as file:
+                        sql_script = file.read()
+                        cursor.execute(sql_script)
+
+                    # Commit the transaction
                     conn.commit()
                     print("Initialized. Database ready.", flush=True)
             except psycopg2.Error as e:
