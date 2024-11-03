@@ -38,7 +38,7 @@ This is a one-time setup. If you have already done this, you can skip to the nex
 2.  Open VSCode and install the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension.
 3.  In VSCode, press `Ctrl+Shift+P` and type `Git: Clone`.
 4.  You may be prompted to login to your GitHub account. Sign in.
-5.  Type `adibarra/queryquest`. Select it.
+5.  Type `adibarra/query-quest`. Select it.
 6.  If prompted, select the `main` branch.
 7.  Once cloned, you should see a popup in the bottom right corner of the screen. Click `Reopen in Container`.
 8.  Let the container build. This will take **2-5 minutes** depending on your machine (only the first time).
@@ -71,7 +71,7 @@ You can re-attach the devcontainer by doing the following from a new VSCode wind
 
 1. Click the `Remote Explorer` tab.
 2. Select `Dev Containers` in the dropdown menu.
-3. Find the `queryquest` container.
+3. Find the `query-quest` container.
 4. Click the `→` button to re-attach the container.
 5. You can now continue development.
 
