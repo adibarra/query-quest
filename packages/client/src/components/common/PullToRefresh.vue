@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import PullToRefresh from 'pulltorefreshjs'
-
-onMounted(() => {
+onMounted(async () => {
   const iosPWA = ((navigator as any).standalone === true)
   if (!iosPWA)
     return
+
+  const { default: PullToRefresh } = await import('pulltorefreshjs')
 
   PullToRefresh.init({
     mainElement: 'body',
