@@ -1,0 +1,20 @@
+type/ci-env:
+  - '.devcontainer/**/*'
+  - '.github/**/*'
+  - '.vscode/**/*'
+  - '**/.gitignore'
+  - '**/tsconfig.json'
+  - .editorconfig
+  - .gitattributes
+  - .nvmrc
+  - eslint.config.js
+  - pnpm-workspace.yaml
+
+type/dependencies:
+  - '**/package.json'
+  - '**/pnpm-lock.yaml'
+
+type/docs:
+  - 'docs/**/*'
+  - '**/README.md'
+  - LICENSE

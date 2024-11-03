@@ -1,0 +1,38 @@
+---
+name: Build and Deploy Images
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy-images:
+    name: 🚀 Build and Deploy Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        name: [client, server]
+    steps:
+      - name: Check out code from GitHub
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push ${{ matrix.name }} image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          file: Dockerfile.${{ matrix.name }}
+          tags: ghcr.io/${{ github.repository }}/${{ matrix.name }}:latest
