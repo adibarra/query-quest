@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
 from config import API_CORS_ORIGINS, API_HOST, API_PORT
+from routes.api.health import router as health_router
 from routes.api.v1.sessions import router as sessions_router
 
 app = FastAPI()
@@ -49,6 +50,7 @@ async def http_exception_handler(request, exc):
 
 
 # TODO: add all routers here
+app.include_router(health_router)
 app.include_router(sessions_router)
 
 if __name__ == "__main__":
