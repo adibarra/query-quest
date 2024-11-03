@@ -4,9 +4,9 @@
  */
 
 {
-  "name": "queryquest",
+  "name": "query-quest",
   "image": "mcr.microsoft.com/devcontainers/base:jammy",
-  "workspaceFolder": "/workspaces/queryquest",
+  "workspaceFolder": "/workspaces/query-quest",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "nodeGypDependencies": true,

@@ -16,7 +16,7 @@ export const preferredDark = usePreferredDark()
  */
 export const isDark = useDark({
   initialValue: 'dark',
-  storageKey: 'queryquest/theme',
+  storageKey: 'query-quest/theme',
 })
 
 /**

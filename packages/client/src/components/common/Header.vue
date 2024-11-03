@@ -20,7 +20,7 @@
         <div i-carbon:home />
       </RouterLink>
       <a
-        href="https://github.com/adibarra/queryquest"
+        href="https://github.com/adibarra/query-quest"
         target="_blank"
         rel="noopener"
         title="GitHub Repository"

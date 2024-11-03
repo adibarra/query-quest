@@ -18,7 +18,7 @@
 
 This is our group project for CS 4347 Database Systems. Our goal is to create a trivia game that allows users to compete against each other for the highest score on the leaderboard. The game will have a variety of categories and questions that are randomly selected for each game. The game will be built using a full-stack web application with a PostgreSQL database for storing user data and game information. The backend will be built using Python and FastAPI, while the frontend will be built using Vue.js.
 
-There is a live demo of the project which deploys the latest changes from the `main` branch. You can access the demo [here](https://queryquest.adibarra.com).
+There is a live demo of the project which deploys the latest changes from the `main` branch. You can access the demo [here](https://quest.adibarra.com).
 
 ## Tooling
 

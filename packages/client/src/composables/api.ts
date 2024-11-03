@@ -31,7 +31,7 @@ type ExpandRecursively<T> = T extends (...args: infer A) => infer R
  * @returns an object with functions to interact with the API
  */
 export function useAPI(options?: { base?: string }) {
-  const API_BASE = options?.base ?? import.meta.env.DEV ? 'http://localhost:3332/api/v1' : 'https://queryquest-api.adibarra.com/api/v1'
+  const API_BASE = options?.base ?? import.meta.env.DEV ? 'http://localhost:3332/api/v1' : 'https://quest-api.adibarra.com/api/v1'
 
   enum API_QUERY {
     EXAMPLE1, EXAMPLE2, EXAMPLE3,
