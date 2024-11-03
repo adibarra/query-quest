@@ -1,3 +1,8 @@
+<!--
+  @author: adibarra (Alec Ibarra)
+  @description: This component is used to display the header of the application.
+-->
+
 <template>
   <header relative sticky top-0 z-999 flex b-b-1 b-b--c-tertiary bg--c-primary px-3 py-2 sm:py-3>
     <div absolute left-0 right-0 my-auto>

@@ -1,3 +1,8 @@
+<!--
+  @author: adibarra (Alec Ibarra)
+  @description: This component is used to enable pull-to-refresh functionality on iOS PWAs.
+-->
+
 <script setup lang="ts">
 onMounted(async () => {
   const iosPWA = ((navigator as any).standalone === true)
