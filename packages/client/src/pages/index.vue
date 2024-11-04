@@ -13,8 +13,14 @@ useHead({
 
 <template>
   <main flex grow flex-col px-4>
-    <div mx-auto mt-20vh max-w-120 min-w-75 w-92vw sm:min-w-120>
-      <div />
+    <div h-10svh />
+    <div mx-2svw flex flex-col gap-2>
+      Temporary links while in development
+      <RouterLink to="/login">
+        <n-button>
+          To Login Page
+        </n-button>
+      </RouterLink>
     </div>
   </main>
   <span
