@@ -1,3 +1,5 @@
+-- cSpell: disable
+
 -- Table that holds all trivia questions and relevant metadata
 CREATE TABLE IF NOT EXISTS Questions(
   id SERIAL NOT NULL,
@@ -23,6 +25,7 @@ CREATE TABLE IF NOT EXISTS Sessions(
   user_uuid CHAR(36) NOT NULL,
   token CHAR(36) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  PRIMARY KEY (user_uuid),
   FOREIGN KEY (user_uuid)
     REFERENCES users(uuid)
     ON DELETE CASCADE
@@ -34,6 +37,7 @@ CREATE TABLE IF NOT EXISTS Statistics (
   xp BIGINT DEFAULT 0 NOT NULL,
   wins INT DEFAULT 0 NOT NULL,
   losses INT DEFAULT 0 NOT NULL,
+  PRIMARY KEY (user_uuid),
   FOREIGN KEY (user_uuid)
     REFERENCES users(uuid)
     ON DELETE CASCADE
