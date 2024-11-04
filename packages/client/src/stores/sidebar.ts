@@ -6,7 +6,7 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
 export const useSidebarStore = defineStore('sidebar', () => {
-  const collapsed = useStorage('sidebar-collapsed', false)
+  const collapsed = useStorage('query-quest/sidebar/collapsed', false)
   const toggle = useToggle(collapsed)
 
   return { collapsed, toggle }
