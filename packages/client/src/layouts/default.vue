@@ -4,10 +4,12 @@
 -->
 
 <template>
-  <PullToRefresh />
-  <Header>
-    <TitleLogo hidden text-3xl sm:block />
-  </Header>
-  <RouterView />
-  <Footer />
+  <div flex grow flex-col bg--c-primary text--c-text min-h-svh>
+    <PullToRefresh />
+    <Header>
+      <TitleLogo hidden text-3xl sm:block />
+    </Header>
+    <RouterView />
+    <Footer />
+  </div>
 </template>

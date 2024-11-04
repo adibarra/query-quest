@@ -1,9 +1,15 @@
+/**
+ * @author: adibarra (Alec Ibarra)
+ * @description: Main entry point for the application
+ */
+
+import type { UserModule } from './types'
 import { createHead } from '@unhead/vue'
+
 import { setupLayouts } from 'virtual:generated-layouts'
 import { createRouter, createWebHistory } from 'vue-router'
 import { routes } from 'vue-router/auto-routes'
-import App from '~/App.vue'
-import type { UserModule } from '~/types'
+import App from './App.vue'
 
 import '@unocss/reset/tailwind.css'
 import 'uno.css'

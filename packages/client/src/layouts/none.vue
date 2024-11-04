@@ -4,6 +4,8 @@
 -->
 
 <template>
-  <PullToRefresh />
-  <RouterView />
+  <div flex grow flex-col bg--c-primary text--c-text min-h-svh>
+    <PullToRefresh />
+    <RouterView />
+  </div>
 </template>

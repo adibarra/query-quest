@@ -11,7 +11,7 @@
     <RouterLink
       to="/"
       title="Logo"
-      tg-icon-btn op-100
+      op-100 qq-icon-btn
     >
       <div i-carbon:unknown text-2xl sm:text-4xl />
     </RouterLink>
@@ -35,10 +35,9 @@
       </a>
       <button
         title="Toggle Theme"
-        tg-icon-btn
+        qq-icon-btn
         @click="toggleTheme()"
         @keydown.enter="toggleTheme()"
-        qq-icon-btn
       >
         <div i="carbon-sun dark:carbon-moon" />
       </button>
