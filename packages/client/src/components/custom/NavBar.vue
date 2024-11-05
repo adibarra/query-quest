@@ -28,13 +28,13 @@ const breadcrumbs = computed(() => {
   const crumbs: Crumb[] = parts.map((part: string) => {
     path += `/${part}`
     return {
-      label: path.replaceAll('/', '.').slice(1),
+      label: part.toLowerCase().replace(/^\w/, (c) => c.toUpperCase()),
       key: path,
     }
   })
 
   if (crumbs.length === 1)
-    crumbs.push({ label: 'home', key: crumbs[0].key })
+    crumbs.push({ label: 'Home', key: crumbs[0].key })
 
   return crumbs
 })
@@ -98,20 +98,6 @@ watch(() => isAuthenticated, () => {
 
       <!-- theme switch -->
       <ThemeSwitch />
-
-      <!-- notifications with badge -->
-      <n-tooltip>
-        <template #trigger>
-          <n-button text @click="() => message.info(`Clicked notifications`)">
-            <n-badge dot processing>
-              <NIcon size="22">
-                <BellIcon />
-              </NIcon>
-            </n-badge>
-          </n-button>
-        </template>
-        Notifications
-      </n-tooltip>
 
       <!-- user dropdown -->
       <n-dropdown
