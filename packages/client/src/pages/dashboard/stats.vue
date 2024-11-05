@@ -14,25 +14,21 @@ const losses = ref(0)
 </script>
 
 <template>
-  <main mx-auto flex grow flex-col px-4>
-    <div h-10svh />
+  <main h-full w-full flex flex-col gap-2>
+    <span mb-3 text-3xl>
+      Statistics
+    </span>
 
-    <div mx-2svw mb-2 max-w-150 w-80svw flex flex-col gap-2>
-      <span text-3xl>
-        Statistics
+    <div flex flex-col>
+      <span px-2 py-1 op-75>
+        Total Wins: {{ wins }}
       </span>
-
-      <div flex flex-col>
-        <span px-2 py-1 op-75>
-          Total Wins: {{ wins }}
-        </span>
-        <span px-2 py-1 op-75>
-          Total Losses: {{ losses }}
-        </span>
-        <span px-2 py-1 op-75>
-          Experience Points: {{ xp }}
-        </span>
-      </div>
+      <span px-2 py-1 op-75>
+        Total Losses: {{ losses }}
+      </span>
+      <span px-2 py-1 op-75>
+        Experience Points: {{ xp }}
+      </span>
     </div>
   </main>
 </template>

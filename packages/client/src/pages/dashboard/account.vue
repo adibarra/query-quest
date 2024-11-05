@@ -13,29 +13,25 @@ const passwordModal = ref(false)
 </script>
 
 <template>
-  <main mx-auto flex grow flex-col px-4>
-    <div h-10svh />
+  <main h-full w-full flex flex-col gap-2>
+    <span mb-3 text-3xl>
+      Account
+    </span>
 
-    <div mx-2svw mb-2 max-w-150 w-80svw flex flex-col gap-2>
-      <span text-3xl>
-        Account
-      </span>
-
-      <div flex justify-between>
-        <div flex flex-col gap-2>
-          <n-button
-            @click="usernameModal = true"
-          >
-            Change Username
-          </n-button>
-          <n-button
-            @click="passwordModal = true"
-          >
-            Change Password
-          </n-button>
-        </div>
+    <div flex justify-between>
+      <div flex flex-col gap-2>
+        <n-button
+          @click="usernameModal = true"
+        >
+          Change Username
+        </n-button>
+        <n-button
+          @click="passwordModal = true"
+        >
+          Change Password
+        </n-button>
       </div>
-   </div>
+    </div>
 
     <ChangeUsernameModal v-model="usernameModal" />
     <ChangePasswordModal v-model="passwordModal" />

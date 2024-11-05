@@ -10,11 +10,8 @@ useHead({
 </script>
 
 <template>
-  <main flex grow flex-col px-4>
-    <div h-10svh />
-    <div mx-2svw flex flex-col gap-2>
-      <div />
-    </div>
+  <main h-full w-full flex flex-col gap-2>
+    <div />
   </main>
 </template>
 
