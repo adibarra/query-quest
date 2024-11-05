@@ -6,9 +6,7 @@
 <template>
   <div flex grow flex-col bg--c-primary text--c-text min-h-svh>
     <PullToRefresh />
-    <Header>
-      <TitleLogo hidden text-3xl sm:block />
-    </Header>
+    <Header />
     <RouterView />
     <Footer />
   </div>
