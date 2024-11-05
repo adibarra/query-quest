@@ -13,7 +13,7 @@
       title="Logo"
       op-100 qq-icon-btn
     >
-      <div i-carbon:unknown text-2xl sm:text-4xl />
+      <Logo />
     </RouterLink>
     <div grow />
     <nav my-auto flex gap-x5 sm:text-xl>
