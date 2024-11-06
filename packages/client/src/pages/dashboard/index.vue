@@ -154,24 +154,11 @@ const allQuestions = ref([
   },
 ])
 
-// Function to extract unique tags from all questions
-function getUniqueTags() {
-  const tags = new Set<string>()
-  allQuestions.value.forEach((question) => {
-    question.tags.forEach((tag) => {
-      tags.add(tag)
-    })
-  })
-  return Array.from(tags)
-}
-
-// Replace the availableTags array with dynamic tags from questions
 const availableTags = ref(getUniqueTags().map(tag => ({
-  label: tag.charAt(0).toUpperCase() + tag.slice(1), // Capitalize first letter
+  label: tag.charAt(0).toUpperCase() + tag.slice(1),
   value: tag.toLowerCase(),
 })))
 
-// States for UI controls
 const tagQuery = ref([])
 const filteredQuestions = computed(() => {
   if (tagQuery.value.length === 0)
@@ -182,7 +169,16 @@ const filteredQuestions = computed(() => {
   )
 })
 
-// Function to navigate to the play page with the question ID
+function getUniqueTags() {
+  const tags = new Set<string>()
+  allQuestions.value.forEach((question) => {
+    question.tags.forEach((tag) => {
+      tags.add(tag)
+    })
+  })
+  return Array.from(tags)
+}
+
 function goToPlayPage(questionId: number) {
   router.push({
     path: '/dashboard/play',
@@ -195,7 +191,6 @@ function loadRandomQuestion() {
   const randomQuestion = allQuestions.value[randomIndex]
   goToPlayPage(randomQuestion.id)
 }
-
 </script>
 
 <template>
@@ -205,9 +200,10 @@ function loadRandomQuestion() {
     </span>
 
     <div flex flex-row justify-between>
-      <!-- Search by Tag -->
-      <div class="max-w-md w-full flex flex-col gap-2">
-        <label for="tag-search" class="text--c-inverse font-medium">Search by Tag:</label>
+      <div max-w-md w-full flex flex-col gap-2>
+        <label text--c-inverse font-medium>
+          Search by Tag:
+        </label>
         <NSelect
           placeholder="Select or type tags"
           clearable
@@ -221,44 +217,47 @@ function loadRandomQuestion() {
       <NButton
         type="primary"
         size="large"
-        class="mt-auto max-w-100 bg--c-secondary text--c-inverse"
+        mt-auto max-w-100 bg--c-secondary text--c-inverse
         @click="loadRandomQuestion"
       >
-        Answer Random Trivia Question
+        Play Random Question
       </NButton>
     </div>
 
-    <!-- Filtered Questions by Tag -->
-    <div v-if="filteredQuestions.length" class="filtered-questions mt-4">
-      <div class="mt-2 space-y-4">
+    <div v-if="filteredQuestions.length">
+      <div mt-2 space-y-4>
         <NCard
           v-for="question in filteredQuestions"
           :key="question.id"
           :title="question.question"
-          class="rounded-md bg--c-secondary p-4 shadow-md"
+          rounded-md bg--c-secondary p-4 shadow-md
         >
           <div flex flex-row justify-between>
             <div flex flex-col gap-2>
-              <div class="flex">
+              <div flex>
                 <span>Difficulty:</span>
                 <NRate :default-value="question.difficulty" readonly />
               </div>
 
-              <div class="flex gap-2">
+              <div flex gap-2>
                 <span>Tags:</span>
-                <div class="flex gap-1">
-                  <NTag v-for="tag in question.tags" :key="tag" type="success" size="small">
+                <div flex gap-1>
+                  <NTag
+                    v-for="tag in question.tags"
+                    :key="tag"
+                    type="success"
+                    size="small"
+                  >
                     {{ tag }}
                   </NTag>
                 </div>
               </div>
             </div>
 
-            <!-- Play Button aligned to the right -->
             <NButton
               type="primary"
-              size="small"
-              class="bg--c-tertiary text--c-inverse"
+              size="medium"
+              bg--c-tertiary text--c-inverse
               @click="goToPlayPage(question.id)"
             >
               Play
@@ -268,10 +267,9 @@ function loadRandomQuestion() {
       </div>
     </div>
 
-    <!-- No results found -->
-    <div v-else-if="tagQuery" class="no-results mt-4">
-      <p class="text--c-inverse italic">
-        No questions found for tag "{{ tagQuery }}"
+    <div v-else-if="tagQuery" mt-4>
+      <p text--c-inverse italic>
+        No questions found for tags: {{ tagQuery }}
       </p>
     </div>
   </main>
