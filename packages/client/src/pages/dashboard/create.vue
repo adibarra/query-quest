@@ -136,17 +136,17 @@ function removeAnswer(index: number) {
 
     <div mt-2 flex gap-2>
       <n-button
+        qq-hover
+        @click="handleCancel"
+      >
+        Cancel
+      </n-button>
+      <n-button
         type="primary"
         bg--c-inverse qq-hover
         @click="handleSubmit"
       >
         Submit
-      </n-button>
-      <n-button
-        qq-hover
-        @click="handleCancel"
-      >
-        Cancel
       </n-button>
     </div>
   </main>
