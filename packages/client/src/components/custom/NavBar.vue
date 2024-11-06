@@ -7,9 +7,6 @@
 import { identicon } from '@dicebear/collection'
 import { createAvatar } from '@dicebear/core'
 import {
-  AddOutline as AddIcon,
-  NotificationsOutline as BellIcon,
-  CaretDownOutline as DropdownIcon,
   LogOutOutline as LogoutIcon,
   RefreshOutline as RefreshIcon,
   PersonCircleOutline as UserIcon,
@@ -28,7 +25,7 @@ const breadcrumbs = computed(() => {
   const crumbs: Crumb[] = parts.map((part: string) => {
     path += `/${part}`
     return {
-      label: part.toLowerCase().replace(/^\w/, (c) => c.toUpperCase()),
+      label: part.toLowerCase().replace(/^\w/, c => c.toUpperCase()),
       key: path,
     }
   })

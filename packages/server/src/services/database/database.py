@@ -2,6 +2,7 @@
 # @description: Database class for handling database interactions
 
 import os
+
 import psycopg2
 from psycopg2 import pool
 
@@ -48,12 +49,17 @@ class Database(
                 conn = cls.instance.connectionPool.getconn()
                 with conn.cursor() as cursor:
                     # Load and execute sql in create.sql
-                    with open(os.path.join(os.path.dirname(__file__), 'sql', 'create.sql'), 'r') as file:
+                    with open(
+                        os.path.join(os.path.dirname(__file__), "sql", "create.sql"),
+                        "r",
+                    ) as file:
                         sql_script = file.read()
                         cursor.execute(sql_script)
 
                     # Load and execute sql in load.sql
-                    with open(os.path.join(os.path.dirname(__file__), 'sql', 'load.sql'), 'r') as file:
+                    with open(
+                        os.path.join(os.path.dirname(__file__), "sql", "load.sql"), "r"
+                    ) as file:
                         sql_script = file.read()
                         cursor.execute(sql_script)
 

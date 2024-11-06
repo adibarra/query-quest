@@ -145,7 +145,7 @@ export default defineConfig({
 
   // https://vite.dev/config/server-options
   server: {
-    host: "127.0.0.1",
+    host: '127.0.0.1',
   },
 
   // https://vitejs.dev/config/build-options

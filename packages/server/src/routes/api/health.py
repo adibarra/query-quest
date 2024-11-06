@@ -10,6 +10,7 @@ router = APIRouter(
     prefix="/api",
 )
 
+
 class HealthCheckResponse(BaseModel):
     code: int
     message: str
@@ -18,12 +19,9 @@ class HealthCheckResponse(BaseModel):
     class Config:
         exclude_none = True
 
+
 @router.get(
     "/health", response_model=HealthCheckResponse, status_code=status.HTTP_200_OK
 )
 async def health_check():
-    return HealthCheckResponse(
-        code=200,
-        message="Ok",
-        data={"status": "Healthy"}
-    )
+    return HealthCheckResponse(code=200, message="Ok", data={"status": "Healthy"})

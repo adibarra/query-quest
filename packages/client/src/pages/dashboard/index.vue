@@ -206,9 +206,7 @@ function loadRandomQuestion() {
         </label>
         <NSelect
           placeholder="Select or type tags"
-          clearable
-          multiple
-          filterable
+          clearable filterable multiple
           :options="availableTags"
           @update:value="(value) => tagQuery = value"
         />
