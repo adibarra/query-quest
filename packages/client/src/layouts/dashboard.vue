@@ -3,11 +3,6 @@
   @description: This component is used to display the dashboard layout of the application.
 -->
 
-<script setup lang="ts">
-const { width } = useWindowSize()
-const isMobile = computed(() => width.value <= 640)
-</script>
-
 <template>
   <PullToRefresh />
   <n-layout position="absolute" h-full>
