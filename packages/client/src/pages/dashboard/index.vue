@@ -8,16 +8,13 @@ useHead({
   title: `Dashboard • QueryQuest`,
 })
 
-const router = useRouter()
-
-// Mock data to simulate DB content (replace with actual API calls as needed)
 const allQuestions = ref([
   {
     id: 1,
     question: 'What is the capital of France?',
     options: ['Paris', 'London', 'Berlin', 'Madrid'],
     tags: ['geography', 'countries'],
-    difficulty: 2, // Difficulty rating 1 to 5
+    difficulty: 2,
   },
   {
     id: 2,
@@ -153,6 +150,8 @@ const allQuestions = ref([
     difficulty: 5,
   },
 ])
+
+const router = useRouter()
 
 const availableTags = ref(getUniqueTags().map(tag => ({
   label: tag.charAt(0).toUpperCase() + tag.slice(1),
