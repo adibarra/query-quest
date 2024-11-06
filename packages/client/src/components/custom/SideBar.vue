@@ -6,9 +6,9 @@
 <script setup lang="ts">
 import type { MenuInst, MenuOption } from 'naive-ui'
 import {
-  Add as AddIcon,
+  NewTab as AddIcon,
   Analytics as AnalyticsIcon,
-  Dashboard as DashboardIcon,
+  Home as HomeIcon,
   User as UserIcon,
 } from '@vicons/carbon'
 import { NIcon } from 'naive-ui'
@@ -16,7 +16,7 @@ import { NIcon } from 'naive-ui'
 const route = useRoute()
 const store = useSidebarStore()
 const menuOptions1: MenuOption[] = [
-  { label: 'Dashboard', key: '/dashboard', icon: renderIcon(DashboardIcon) },
+  { label: 'Home', key: '/dashboard', icon: renderIcon(HomeIcon) },
   { label: 'Create', key: '/dashboard/create', icon: renderIcon(AddIcon) },
   { label: 'Stats', key: '/dashboard/stats', icon: renderIcon(AnalyticsIcon) },
 ]
