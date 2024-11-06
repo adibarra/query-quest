@@ -227,7 +227,7 @@ function loadRandomQuestion() {
           v-for="question in filteredQuestions"
           :key="question.id"
           :title="question.question"
-          rounded-md bg--c-secondary p-4 shadow-md
+          rounded-md bg--c-secondary p-2 shadow-md
         >
           <div flex flex-row justify-between>
             <div flex flex-col gap-2>
