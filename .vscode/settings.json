@@ -15,6 +15,7 @@
     "corepack",
     "csstools",
     "dbaeumer",
+    "deauth",
     "demi",
     "Destructurable",
     "devcontainer",

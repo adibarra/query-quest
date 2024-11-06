@@ -9,7 +9,7 @@ import type { Router } from 'vue-router'
 export type UserModule = (ctx: { app: App, router: Router }) => void
 
 export interface User {
-  id: string
+  uuid: string
   username: string
 }
 
@@ -28,7 +28,7 @@ export interface Tag {
 }
 
 export interface Stats {
-  totalQuestions: number
-  totalTags: number
-  totalUsers: number
+  wins: number
+  losses: number
+  xp: number
 }

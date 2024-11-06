@@ -3,6 +3,16 @@
   @description: This component is used to display the dashboard layout of the application.
 -->
 
+<script setup lang="ts">
+const router = useRouter()
+const state = useStateStore()
+
+onBeforeMount(() => {
+  if (!state.isAuthenticated)
+    router.replace('/login')
+})
+</script>
+
 <template>
   <PullToRefresh />
   <n-layout position="absolute" h-full>

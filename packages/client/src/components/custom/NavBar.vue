@@ -13,9 +13,11 @@ import {
 } from '@vicons/ionicons5'
 import { NIcon, useMessage } from 'naive-ui'
 
-const message = useMessage()
+const quest = useAPI()
 const route = useRoute()
 const router = useRouter()
+const message = useMessage()
+const state = useStateStore()
 
 interface Crumb { label: string, key: string }
 const breadcrumbs = computed(() => {
@@ -36,10 +38,8 @@ const breadcrumbs = computed(() => {
   return crumbs
 })
 
-const username = 'example'
-
 const avatar = computed(() => {
-  return createAvatar(identicon, { seed: username }).toDataUri()
+  return createAvatar(identicon, { seed: state.user?.uuid }).toDataUri()
 })
 
 function renderIcon(icon: Component) {
@@ -49,14 +49,6 @@ function renderIcon(icon: Component) {
     })
   }
 }
-
-const isAuthenticated = ref(true)
-
-// redirect to login if not authenticated
-watch(() => isAuthenticated, () => {
-  if (!isAuthenticated.value)
-    router.push('/login')
-}, { immediate: true })
 </script>
 
 <template>
@@ -99,15 +91,16 @@ watch(() => isAuthenticated, () => {
       <!-- user dropdown -->
       <n-dropdown
         :options="[
-          { key: 0, label: username, icon: renderIcon(UserIcon), disabled: true },
+          { key: 0, label: state.user?.username, icon: renderIcon(UserIcon), disabled: true },
           { key: 1, type: 'divider' },
           { key: 2, label: 'Logout', icon: renderIcon(LogoutIcon) },
         ]"
         trigger="click"
-        @select="async (key: any, option: any) => {
+        @select="async (key: any) => {
           if (key === 2) {
+            quest.deauth()
             message.success('Logged out')
-            isAuthenticated.value = false
+            router.push('/login')
           }
         }"
       >
