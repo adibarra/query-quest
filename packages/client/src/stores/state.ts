@@ -8,7 +8,9 @@ import type { User } from '~/types'
 
 export const useStateStore = defineStore('state', () => {
   const user = ref<User | null>(null)
-  const isAuthenticated = computed(() => user.value !== null)
+
+  // TODO: remove always true
+  const isAuthenticated = computed(() => user.value !== null || true)
 
   return {
     user,
