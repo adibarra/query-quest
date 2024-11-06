@@ -26,28 +26,28 @@ const allQuestions = ref([
   {
     id: 3,
     question: 'What is the smallest prime number?',
-    options: ['0', '1', '2', '3'],
+    options: ['2', '0', '1', '3'],
     tags: ['math', 'numbers'],
     difficulty: 1,
   },
   {
     id: 4,
     question: 'Which planet is known as the Red Planet?',
-    options: ['Earth', 'Mars', 'Jupiter', 'Venus'],
+    options: ['Mars', 'Earth', 'Jupiter', 'Venus'],
     tags: ['science', 'astronomy'],
     difficulty: 2,
   },
   {
     id: 5,
     question: 'What is the largest ocean on Earth?',
-    options: ['Atlantic Ocean', 'Indian Ocean', 'Arctic Ocean', 'Pacific Ocean'],
+    options: ['Pacific Ocean', 'Atlantic Ocean', 'Indian Ocean', 'Arctic Ocean'],
     tags: ['geography', 'oceans'],
     difficulty: 4,
   },
   {
     id: 6,
     question: 'Who painted the Mona Lisa?',
-    options: ['Vincent van Gogh', 'Leonardo da Vinci', 'Pablo Picasso', 'Claude Monet'],
+    options: ['Leonardo da Vinci', 'Vincent van Gogh', 'Pablo Picasso', 'Claude Monet'],
     tags: ['art', 'artists'],
     difficulty: 3,
   },
@@ -96,14 +96,14 @@ const allQuestions = ref([
   {
     id: 13,
     question: 'Which country is known as the Land of the Rising Sun?',
-    options: ['China', 'South Korea', 'Japan', 'Vietnam'],
+    options: ['Japan', 'China', 'South Korea', 'Vietnam'],
     tags: ['geography', 'countries'],
     difficulty: 2,
   },
   {
     id: 14,
     question: 'What is the main ingredient in guacamole?',
-    options: ['Tomato', 'Avocado', 'Onion', 'Garlic'],
+    options: ['Avocado', 'Tomato', 'Onion', 'Garlic'],
     tags: ['food', 'cooking'],
     difficulty: 1,
   },
@@ -117,7 +117,7 @@ const allQuestions = ref([
   {
     id: 16,
     question: 'Who was the first President of the United States?',
-    options: ['Abraham Lincoln', 'Thomas Jefferson', 'George Washington', 'John Adams'],
+    options: ['George Washington', 'Abraham Lincoln', 'Thomas Jefferson', 'John Adams'],
     tags: ['history', 'USA'],
     difficulty: 3,
   },
@@ -131,7 +131,7 @@ const allQuestions = ref([
   {
     id: 18,
     question: 'What is the currency of Japan?',
-    options: ['Yuan', 'Won', 'Yen', 'Ringgit'],
+    options: ['Yen', 'Yuan', 'Won', 'Ringgit'],
     tags: ['currency', 'countries'],
     difficulty: 3,
   },
@@ -145,7 +145,7 @@ const allQuestions = ref([
   {
     id: 20,
     question: 'What is the largest country by land area?',
-    options: ['Canada', 'Russia', 'United States', 'China'],
+    options: ['Russia', 'Canada', 'United States', 'China'],
     tags: ['geography', 'countries'],
     difficulty: 5,
   },
@@ -161,7 +161,9 @@ const isQuestionVisible = ref(true)
 const areOptionsVisible = ref(false)
 const isResultVisible = ref(false)
 const userAnswer = ref<string | null>(null)
-const isCorrect = computed(() => userAnswer.value === currentQuestion.value.options[0])
+
+const correctAnswer = computed(() => currentQuestion.value.options[0])
+const isCorrect = computed(() => userAnswer.value === correctAnswer.value)
 
 const scrambledOptions = computed(() => {
   const options = [...currentQuestion.value.options]
@@ -208,7 +210,8 @@ showOptions()
 </script>
 
 <template>
-  <main h-full w-full flex flex-col items-center justify-center>
+  <main h-full w-full flex flex-col items-center>
+    <div h-10svh />
     <div v-if="isQuestionVisible" mb-4 text-2xl font-semibold>
       {{ currentQuestion.question }}
     </div>
@@ -226,13 +229,13 @@ showOptions()
       </NButton>
     </div>
 
-    <div v-show="isResultVisible" class="result mt-4 text-center">
+    <div v-show="isResultVisible" class="mt-4 text-center">
       <p :class="{ 'text-green-500': isCorrect, 'text-red-500': !isCorrect }" text-2xl font-bold>
         {{ isCorrect ? 'Correct! 🎉' : 'Oops, try again! ❌' }}
       </p>
 
       <div mt-2 text-xl text-blue-500>
-        +10 XP
+        +{{ isCorrect ? 10 : 0 }} XP
       </div>
 
       <div mt-4 flex justify-center gap-4>
@@ -248,21 +251,11 @@ showOptions()
 </template>
 
 <style scoped>
-.result {
-  transform: scale(0.8);
-  transition:
-    transform 0.5s ease-in-out,
-    opacity 0.5s ease-in-out;
-}
-.result[style*='display: block;'] {
-  transform: scale(1);
-}
-
 .option-button {
   transition: transform 0.2s ease;
 }
 .option-button:hover {
-  transform: scale(1.05);
+  transform: scale(1.15);
 }
 </style>
 
