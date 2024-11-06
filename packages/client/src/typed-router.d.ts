@@ -24,6 +24,7 @@ declare module 'vue-router/auto-routes' {
     '/dashboard/[...all]': RouteRecordInfo<'/dashboard/[...all]', '/dashboard/:all(.*)', { all: ParamValue<true> }, { all: ParamValue<false> }>,
     '/dashboard/account': RouteRecordInfo<'/dashboard/account', '/dashboard/account', Record<never, never>, Record<never, never>>,
     '/dashboard/create': RouteRecordInfo<'/dashboard/create', '/dashboard/create', Record<never, never>, Record<never, never>>,
+    '/dashboard/play': RouteRecordInfo<'/dashboard/play', '/dashboard/play', Record<never, never>, Record<never, never>>,
     '/dashboard/stats': RouteRecordInfo<'/dashboard/stats', '/dashboard/stats', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
   }
