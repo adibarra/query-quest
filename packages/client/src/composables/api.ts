@@ -40,6 +40,7 @@ export function useAPI(options?: { base?: string }) {
     POST_SESSION, DELETE_SESSION,
     POST_USER, GET_USER, UPDATE_USER, DELETE_USER,
     POST_QUESTION, GET_QUESTION,
+    GET_QUESTIONS,
     GET_TAGS,
     GET_STATS,
     SUBMIT_ANSWER,
@@ -54,6 +55,7 @@ export function useAPI(options?: { base?: string }) {
     [API_QUERY.DELETE_USER]: 0,
     [API_QUERY.POST_QUESTION]: 0,
     [API_QUERY.GET_QUESTION]: 0,
+    [API_QUERY.GET_QUESTIONS]: 0,
     [API_QUERY.GET_TAGS]: 0,
     [API_QUERY.GET_STATS]: 0,
     [API_QUERY.SUBMIT_ANSWER]: 0,
@@ -237,6 +239,26 @@ export function useAPI(options?: { base?: string }) {
       }
       return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
     },
+    /**
+     * Get all questions
+     */
+    getQuestions: async (): Promise<API_RESPONSE[API_QUERY.GET_QUESTIONS]> => {
+      const requestTimestamp = Date.now()
+
+      const response = await useFetch(`${API_BASE}/questions`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token.value}`,
+          'Content-Type': 'application/json',
+        },
+      }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.GET_QUESTIONS]>()
+
+      if (requestTimestamp > latestCompletedTimestamps[API_QUERY.GET_QUESTIONS]) {
+        latestCompletedTimestamps[API_QUERY.GET_QUESTIONS] = requestTimestamp
+        return handleErrors<API_QUERY.GET_QUESTIONS>(response)
+      }
+      return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
+    },
     getTags: async (): Promise<API_RESPONSE[API_QUERY.GET_TAGS]> => {
       const requestTimestamp = Date.now()
 
@@ -325,6 +347,7 @@ export function useAPI(options?: { base?: string }) {
     [API_QUERY.DELETE_USER]: ExpandRecursively<BaseAPIResponse | BadAPIResponse>
     [API_QUERY.POST_QUESTION]: ExpandRecursively<BaseAPIResponse | BadAPIResponse>
     [API_QUERY.GET_QUESTION]: ExpandRecursively<DataAPIResponse<Question> | BadAPIResponse>
+    [API_QUERY.GET_QUESTIONS]: ExpandRecursively<DataAPIResponse<Question[]> | BadAPIResponse>
     [API_QUERY.GET_TAGS]: ExpandRecursively<DataAPIResponse<Tag[]> | BadAPIResponse>
     [API_QUERY.GET_STATS]: ExpandRecursively<DataAPIResponse<Stats> | BadAPIResponse>
     [API_QUERY.SUBMIT_ANSWER]: ExpandRecursively<DataAPIResponse<boolean> | BadAPIResponse>
