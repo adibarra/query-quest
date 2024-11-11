@@ -5,16 +5,13 @@
 
 {
   "name": "query-quest",
-  "image": "mcr.microsoft.com/devcontainers/base:jammy",
+  "image": "mcr.microsoft.com/devcontainers/base:alpine",
   "workspaceFolder": "/workspaces/query-quest",
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "nodeGypDependencies": true,
-      "version": "lts",
-      "nvmVersion": "latest"
-    },
-    "ghcr.io/devcontainers/features/python:1": {
-      "version": "latest"
+    "ghcr.io/adibarra/devcontainer-features/alpine-nvm:1": {},
+    "./local-features/python": {
+      /* From: https://github.com/devcontainers/features/pull/1015 */
+      "installTools": false
     }
   },
   "customizations": {
