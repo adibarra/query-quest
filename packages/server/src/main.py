@@ -9,8 +9,8 @@ from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
 from config import API_CORS_ORIGINS, API_HOST, API_PORT
-from routes.api.health import router as health_router
-from routes.api.v1.sessions import router as sessions_router
+from routes.api.health import router as api_health_router
+from routes.api.v1.sessions import router as api_v1_sessions_router
 
 app = FastAPI()
 
@@ -24,10 +24,11 @@ app.add_middleware(
 
 
 @app.exception_handler(404)
-async def not_found_exception_handler(request, exc):
+async def not_found_exception_handler(request, exec):
+    print("Not found error:", exec)
     return JSONResponse(
-        status_code=exc.status_code,
-        content={"code": exc.status_code, "message": exc.detail},
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"code": 404, "message": 'Not Found'},
     )
 
 
@@ -43,15 +44,16 @@ async def validation_exception_handler(request, exc):
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
+    print("HTTP error:", exc)
     return JSONResponse(
-        status_code=exc.status_code,
-        content={"code": exc.status_code, "message": exc.detail},
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"code": 500, "message": "Internal Server Error"},
     )
 
 
 # TODO: add all routers here
-app.include_router(health_router)
-app.include_router(sessions_router)
+app.include_router(api_health_router)
+app.include_router(api_v1_sessions_router)
 
 if __name__ == "__main__":
     uvicorn.run(
