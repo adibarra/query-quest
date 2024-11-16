@@ -44,24 +44,42 @@ class QuestionResponse(BaseModel):
 def get_questions():
     questions = db.get_all_questions()
     if not questions:
-        return QuestionResponse(code=404, message="No questions found", data=None)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not Found",
+        )
+
     return QuestionResponse(code=200, message="Ok", data=questions)
+
+
+@router.get(
+    "/questions/{question_id}",
+    response_model=QuestionResponse,
+    status_code=status.HTTP_200_OK,
+)
+def get_question(question_id: int):
+    question = db.get_one_question(question_id)
+    if not question:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not Found",
+        )
+
+    return QuestionResponse(code=200, message="Ok", data=question)
 
 
 @router.post(
     "/questions", response_model=QuestionResponse, status_code=status.HTTP_201_CREATED
 )
 def create_question(request: QuestionRequest):
-    try:
-        new_question_id = db.create_question(request)
-        return QuestionResponse(
-            code=201,
-            message=f"Question created with id {new_question_id}",
-            data=None,
+    new_question_data = db.create_question(request)
+    if not new_question_data:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error",
         )
-    except Exception as e:
-        print(f"Error creating question: {e}", flush=True)
-        raise HTTPException(status_code=500, detail="Failed to create the question")
+
+    return QuestionResponse(code=200, message="Ok", data=new_question_data)
 
 
 @router.delete(
@@ -70,12 +88,10 @@ def create_question(request: QuestionRequest):
     status_code=status.HTTP_200_OK,
 )
 def delete_question(question_id: int):
-    try:
-        if db.delete_question(question_id):
-            return QuestionResponse(
-                code=200, message="Question deleted successfully", data=None
-            )
-        return QuestionResponse(code=404, message="Question not found", data=None)
-    except Exception as e:
-        print(f"Error deleting question: {e}", flush=True)
-        raise HTTPException(status_code=500, detail="Failed to delete the question")
+    if not db.delete_question(question_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not Found",
+        )
+
+    return QuestionResponse(code=200, message="Ok")
