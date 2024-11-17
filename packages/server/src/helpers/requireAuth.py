@@ -1,13 +1,15 @@
 # @author: adibarra (Alec Ibarra)
-# @description: Helper function to require a token for a request
+# @description: Helper function to require authentication for a route.
 
 from fastapi import Header, HTTPException, status
+
 from helpers.types import SessionDict
 from services.database import Database
 
 db = Database()
 
-async def requireToken(
+
+async def requireAuth(
     authorization: str = Header(...),
 ) -> SessionDict:
     """
@@ -31,35 +33,19 @@ async def requireToken(
         HTTPException: If the Authorization header is missing or improperly formatted (400 Bad Request).
         HTTPException: If the token is invalid or not found in the database (401 Unauthorized).
     """
-    try:
-        # Split and validate the Authorization header
-        parts = authorization.split(" ")
-        if len(parts) != 2 or parts[0].lower() != "bearer":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Bad Request: Missing or Malformed Authorization Header",
-            )
 
-        # Extract the token
-        token = parts[1]
-
-        # Retrieve the session from the database
-        session = db.get_session(token=token)
-
-        if session is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Unauthorized: Invalid or Expired Token",
-            )
-
-        return session
-    except HTTPException:
-        # Re-raise expected HTTP exceptions
-        raise
-    except Exception as e:
-        # Log unexpected exceptions for debugging
-        print(f"Unexpected error in requireToken: {e}", flush=True)
+    parts = authorization.split(" ")
+    if len(parts) != 2 or parts[0].lower() != "bearer":
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error: Unexpected error during token validation",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Bad Request: Missing or Malformed Authorization Header",
         )
+
+    session = db.get_session(token=parts[1])
+    if session is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized: Invalid or Expired Token",
+        )
+
+    return session
