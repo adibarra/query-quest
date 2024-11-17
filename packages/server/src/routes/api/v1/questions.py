@@ -94,7 +94,7 @@ def create_question(
             detail="Failed to create the question",
         )
 
-    return QuestionResponse(code=201, message="Ok", data=[new_question_data])
+    return QuestionResponse(code=201, message="Created", data=[new_question_data])
 
 
 # @router.delete(

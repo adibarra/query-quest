@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List
 if TYPE_CHECKING:
     from psycopg2.pool import SimpleConnectionPool
 
+
 class MetaMixin:
     """
     A collection of methods for handling meta database operations.
@@ -13,7 +14,7 @@ class MetaMixin:
 
     connectionPool: "SimpleConnectionPool"
 
-    def execute_query(self, query: str, params: tuple = ()) -> List[Dict[str, Any]]:
+    def execute_query(self, query: str, params: list = []) -> List[Dict[str, Any]]:
         """
         !!! DO NOT USE THIS IN PRODUCTION CODE !!!
 
@@ -21,7 +22,7 @@ class MetaMixin:
 
         Args:
             query (str): The SQL query to execute.
-            params (tuple): The parameters to pass to the query.
+            params (list): The parameters to pass to the query.
 
         Returns:
             List[Dict[str, Any]]: A list of dictionaries representing the query results.
@@ -61,5 +62,11 @@ class MetaMixin:
             List[str]: A list of table names as strings.
         """
 
-        result = self.execute_query("SELECT table_name FROM information_schema.tables WHERE table_schema='public';")
+        result = self.execute_query(
+            """
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema='public'
+            """
+        )
         return [table["table_name"] for table in result] if result else []

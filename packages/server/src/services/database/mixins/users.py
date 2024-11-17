@@ -2,6 +2,7 @@
 # @description: Database class for handling user database operations
 
 from typing import TYPE_CHECKING, Optional
+
 from helpers.types import UserDict
 
 if TYPE_CHECKING:
@@ -50,9 +51,23 @@ class UsersMixin:
             conn = self.connectionPool.getconn()
             with conn.cursor() as cursor:
                 if uuid:
-                    cursor.execute("SELECT * FROM users WHERE uuid = %s", (uuid,))
+                    cursor.execute(
+                        """
+                        SELECT *
+                        FROM users
+                        WHERE uuid = %s
+                        """,
+                        [uuid],
+                    )
                 elif username:
-                    cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+                    cursor.execute(
+                        """
+                        SELECT *
+                        FROM users
+                        WHERE username = %s
+                        """,
+                        [username],
+                    )
                 conn.commit()
 
                 result = cursor.fetchone()

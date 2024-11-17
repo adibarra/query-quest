@@ -32,7 +32,14 @@ class QuestionsMixin:
         try:
             conn = self.connectionPool.getconn()
             with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM Questions WHERE id = %s", (question_id,))
+                cursor.execute(
+                    """
+                    SELECT *
+                    FROM Questions
+                    WHERE id = %s
+                    """,
+                    [question_id],
+                )
                 question_data = cursor.fetchone()
 
                 if not question_data:
@@ -59,7 +66,12 @@ class QuestionsMixin:
         try:
             conn = self.connectionPool.getconn()
             with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM Questions")
+                cursor.execute(
+                    """
+                    SELECT *
+                    FROM Questions
+                    """,
+                )
                 questions_data = cursor.fetchall()
 
                 if not questions_data:
@@ -92,16 +104,17 @@ class QuestionsMixin:
                 cursor.execute(
                     """
                     INSERT INTO Questions (question, difficulty, option1, option2, option3, option4)
-                    VALUES (%s, %s, %s, %s, %s, %s) RETURNING *
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING *
                     """,
-                    (
+                    [
                         question.question,
                         question.difficulty,
                         question.option1,
                         question.option2,
                         question.option3 or None,
                         question.option4 or None,
-                    ),
+                    ],
                 )
                 question_data = cursor.fetchone()
                 conn.commit()
@@ -142,7 +155,13 @@ class QuestionsMixin:
         try:
             conn = self.connectionPool.getconn()
             with conn.cursor() as cursor:
-                cursor.execute("DELETE FROM Questions WHERE id = %s", (question_id,))
+                cursor.execute(
+                    """
+                    DELETE FROM Questions
+                    WHERE id = %s
+                    """,
+                    [question_id],
+                )
                 conn.commit()
                 if cursor.rowcount > 0:
                     print(

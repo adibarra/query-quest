@@ -57,7 +57,7 @@ class SessionsMixin:
                         FROM sessions
                         WHERE user_uuid = %s
                         """,
-                        (user_uuid,)
+                        [user_uuid],
                     )
                 elif token:
                     cursor.execute(
@@ -66,7 +66,7 @@ class SessionsMixin:
                         FROM sessions
                         WHERE token = %s
                         """,
-                        (token,)
+                        [token],
                     )
                 conn.commit()
 
@@ -127,7 +127,7 @@ class SessionsMixin:
                     DO UPDATE SET token = gen_random_uuid(), created_at = NOW()
                     RETURNING *
                     """,
-                    (user_uuid,),
+                    [user_uuid],
                 )
                 conn.commit()
 
@@ -187,7 +187,7 @@ class SessionsMixin:
                         DELETE FROM sessions
                         WHERE user_uuid = %s
                         """,
-                        (user_uuid,)
+                        [user_uuid],
                     )
                 elif token:
                     cursor.execute(
@@ -195,7 +195,7 @@ class SessionsMixin:
                         DELETE FROM sessions
                         WHERE token = %s
                         """,
-                        (token,)
+                        [token],
                     )
                 conn.commit()
 
