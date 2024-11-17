@@ -47,15 +47,15 @@ This is a one-time setup. If you have already done this, you can skip to the nex
 
 <details>
 <summary>Manual Environment Setup</summary>
-The devcontainer does all of this for you.
+The devcontainer does all of this for you while making sure the environment is consistent with the production environment and the rest of the team. If you want to set up the environment manually, follow these steps:
 
 1. Install [Python3](https://www.python.org/downloads/) for your platform.
-2. Install [nvm](https://github.com/nvm-sh/nvm) for your platform.
+2. Install [nvm](https://github.com/nvm-sh/nvm) (preferred) or [Node.js](https://nodejs.org/en/download/) for your platform.
 3. Git clone the repository.
 4. Run the following commands:
 
 ```bash
-  $ nvm use || nvm install --lts
+  $ nvm use || nvm install --lts # if you installed nvm
   $ corepack enable
   $ corepack install
   $ cp --no-clobber .env.example .env.production
