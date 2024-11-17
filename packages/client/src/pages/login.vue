@@ -2,6 +2,7 @@
   @author: adibarra (Alec Ibarra)
   @description: This component is used to display the login/register page of the application.
 -->
+
 <script setup lang="ts">
 const quest = useAPI()
 const router = useRouter()
@@ -24,10 +25,24 @@ async function handleSubmit() {
       return
     }
 
-    await quest.auth({
+    const response = await quest.auth({
       username: username.value,
       password: password.value,
     })
+
+    if (response.code !== API_STATUS.CREATED) {
+      switch (response.code) {
+        case API_STATUS.NOT_FOUND:
+          error.value = 'User not found.'
+          break
+        case API_STATUS.FORBIDDEN:
+          error.value = 'Invalid password.'
+          break
+        default:
+          error.value = response.message
+          break
+      }
+    }
   }
   else {
     if (!username.value || !password.value || !confirmPassword.value) {
@@ -46,8 +61,14 @@ async function handleSubmit() {
     })
 
     if (userResponse.code !== API_STATUS.CREATED) {
-      error.value = userResponse.message
-      return
+      switch (userResponse.code) {
+        case API_STATUS.CONFLICT:
+          error.value = 'Username already exists.'
+          break
+        default:
+          error.value = userResponse.message
+          break
+      }
     }
 
     await quest.auth({
@@ -68,7 +89,7 @@ watch(() => state.isAuthenticated, (isAuthenticated) => {
   if (!isAuthenticated)
     return
   router.push('/dashboard')
-})
+}, { immediate: true })
 </script>
 
 <template>

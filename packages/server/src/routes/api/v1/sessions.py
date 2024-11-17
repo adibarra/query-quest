@@ -39,7 +39,7 @@ class SessionResponse(BaseModel):
 
 
 @router.post(
-    "/sessions", response_model=SessionResponse, status_code=status.HTTP_200_OK
+    "/sessions", response_model=SessionResponse, status_code=status.HTTP_201_CREATED
 )
 def create_session(
     data: SessionRequest = Body(...),
@@ -64,7 +64,7 @@ def create_session(
             detail="Internal Server Error: Could not create session",
         )
 
-    return SessionResponse(code=200, message="Ok", data=session)
+    return SessionResponse(code=201, message="Created", data=session)
 
 
 @router.delete(
