@@ -3,7 +3,7 @@
  * @description: Composable for providing access to the QueryQuest API
  */
 import type { UseFetchReturn } from '@vueuse/core'
-import type { Question, Stats, Tag, User } from '~/types'
+import type { Question, Session, Stats, Tag, User } from '~/types'
 
 const token = useSessionStorage('query-quest/token', '')
 
@@ -63,16 +63,24 @@ export function useAPI(options?: { base?: string }) {
 
   return {
     /**
+     * Set the API token
+     */
+    setToken: (newToken: string) => token.value = newToken,
+    /**
+     * Get the API token
+     */
+    getToken: () => token.value,
+    /**
      * Create a new session
      * @param data
      * @param data.username the user's username
      * @param data.password the user's password
-     * @returns a new API token if successful
+     * @returns a new session object if successful
      */
     auth: async (data: { username: string, password: string }): Promise<API_RESPONSE[API_QUERY.POST_SESSION]> => {
       const requestTimestamp = Date.now()
 
-      const response = await useFetch(`${API_BASE}/sessions?`, {
+      const response = await useFetch(`${API_BASE}/sessions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(removeEmpty(data)),
@@ -90,7 +98,7 @@ export function useAPI(options?: { base?: string }) {
     deauth: async (): Promise<API_RESPONSE[API_QUERY.POST_SESSION]> => {
       const requestTimestamp = Date.now()
 
-      const response = await useFetch(`${API_BASE}/sessions?`, {
+      const response = await useFetch(`${API_BASE}/sessions`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: token.value }),
@@ -107,7 +115,7 @@ export function useAPI(options?: { base?: string }) {
      * @param data
      * @param data.username The user's username
      * @param data.password The user's password
-     * @returns a new API token if successful
+     * @returns a new user object if successful
      */
     createUser: async (data: { username: string, password: string }): Promise<API_RESPONSE[API_QUERY.POST_USER]> => {
       const requestTimestamp = Date.now()
@@ -126,7 +134,7 @@ export function useAPI(options?: { base?: string }) {
     },
     /**
      * Get the user's information
-     * @returns a User object if successful
+     * @returns a user object if successful
      */
     getUser: async (): Promise<API_RESPONSE[API_QUERY.GET_USER]> => {
       const requestTimestamp = Date.now()
@@ -150,7 +158,7 @@ export function useAPI(options?: { base?: string }) {
      * @param data
      * @param data.username The user's new username
      * @param data.password The user's new password
-     * @returns a User object if successful
+     * @returns a new user object if successful
      */
     updateUser: async (data: { username?: string, password?: string }): Promise<API_RESPONSE[API_QUERY.UPDATE_USER]> => {
       const requestTimestamp = Date.now()
@@ -338,9 +346,9 @@ export function useAPI(options?: { base?: string }) {
   }
 
   interface API_RESPONSE {
-    [API_QUERY.POST_SESSION]: ExpandRecursively<DataAPIResponse<string> | BadAPIResponse>
+    [API_QUERY.POST_SESSION]: ExpandRecursively<DataAPIResponse<Session> | BadAPIResponse>
     [API_QUERY.DELETE_SESSION]: ExpandRecursively<BaseAPIResponse | BadAPIResponse>
-    [API_QUERY.POST_USER]: ExpandRecursively<DataAPIResponse<string> | BadAPIResponse>
+    [API_QUERY.POST_USER]: ExpandRecursively<DataAPIResponse<User> | BadAPIResponse>
     [API_QUERY.GET_USER]: ExpandRecursively<DataAPIResponse<User> | BadAPIResponse>
     [API_QUERY.UPDATE_USER]: ExpandRecursively<DataAPIResponse<User> | BadAPIResponse>
     [API_QUERY.DELETE_USER]: ExpandRecursively<BaseAPIResponse | BadAPIResponse>
