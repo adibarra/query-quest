@@ -3,6 +3,9 @@
   @description: This component is used to display the login/register page of the application.
 -->
 <script setup lang="ts">
+const quest = useAPI()
+const router = useRouter()
+const state = useStateStore()
 const activeForm = useStorage<'login' | 'register'>('login-last-form', 'register')
 const rememberMe = useStorage('login-remember-me', false)
 const username = useStorage('login-username', '')
@@ -14,15 +17,65 @@ useHead({
   title: `Login/Register • QueryQuest`,
 })
 
-async function handleSubmit() { }
+async function handleSubmit() {
+  if (activeForm.value === 'login') {
+    if (!username.value || !password.value) {
+      error.value = 'Please fill out all fields.'
+      return
+    }
+
+    const authResponse = await quest.auth({
+      username: username.value,
+      password: password.value,
+    })
+
+    if (authResponse.code === API_STATUS.OK) {
+      quest.setToken(authResponse.data.token)
+    }
+  }
+  else {
+    if (!username.value || !password.value || !confirmPassword.value) {
+      error.value = 'Please fill out all fields.'
+      return
+    }
+
+    if (password.value !== confirmPassword.value) {
+      error.value = 'Passwords do not match.'
+      return
+    }
+
+    const userResponse = await quest.createUser({
+      username: username.value,
+      password: password.value,
+    })
+
+    if (userResponse.code !== API_STATUS.OK) {
+      error.value = userResponse.message
+      return
+    }
+
+    const authResponse = await quest.auth({
+      username: username.value,
+      password: password.value,
+    })
+
+    if (authResponse.code === API_STATUS.OK) {
+      quest.setToken(authResponse.data.token)
+    }
+  }
+}
 
 function toggleForm() {
   activeForm.value = activeForm.value === 'login' ? 'register' : 'login'
 
-  // clear confirm password if switching forms
   if (activeForm.value === 'register')
     confirmPassword.value = ''
 }
+
+watch(() => state.isAuthenticated, (isAuthenticated) => {
+  if (!isAuthenticated) return
+  router.push('/dashboard')
+})
 </script>
 
 <template>

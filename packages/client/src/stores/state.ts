@@ -6,11 +6,21 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import type { User } from '~/types'
 
+const quest = useAPI()
+
 export const useStateStore = defineStore('state', () => {
+  const isAuthenticated = computed(() => quest.getToken().length > 0)
   const user = ref<User | null>(null)
 
-  // TODO: remove always true
-  const isAuthenticated = computed(() => user.value !== null || true)
+  watch(isAuthenticated, async () => {
+    if (!isAuthenticated.value) return null
+
+    const response = await quest.getUser()
+    if (response.code === API_STATUS.OK) {
+      return response.data
+    }
+    return null
+  }, { immediate: true })
 
   return {
     user,
