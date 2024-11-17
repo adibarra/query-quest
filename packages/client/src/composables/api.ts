@@ -2,7 +2,7 @@
  * @author: adibarra (Alec Ibarra)
  * @description: Composable for providing access to the QueryQuest API
  */
-import type { UseFetchReturn } from '@vueuse/core'
+import type { AfterFetchContext, UseFetchReturn } from '@vueuse/core'
 import type { Question, Session, Stats, Tag, User } from '~/types'
 
 const token = useSessionStorage('query-quest/token', '')
@@ -61,11 +61,17 @@ export function useAPI(options?: { base?: string }) {
     [API_QUERY.SUBMIT_ANSWER]: 0,
   }
 
+  function setToken(ctx: AfterFetchContext) {
+    token.value = ctx.data.data.token
+    return ctx
+  }
+
+  function clearToken(ctx: AfterFetchContext) {
+    token.value = ''
+    return ctx
+  }
+
   return {
-    /**
-     * Set the API token
-     */
-    setToken: (newToken: string) => token.value = newToken,
     /**
      * Get the API token
      */
@@ -84,7 +90,7 @@ export function useAPI(options?: { base?: string }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(removeEmpty(data)),
-      }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.POST_SESSION]>()
+      }, { afterFetch: setToken, timeout: 3333 }).json<API_RESPONSE[API_QUERY.POST_SESSION]>()
 
       if (requestTimestamp > latestCompletedTimestamps[API_QUERY.POST_SESSION]) {
         latestCompletedTimestamps[API_QUERY.POST_SESSION] = requestTimestamp
@@ -95,18 +101,19 @@ export function useAPI(options?: { base?: string }) {
     /**
      * Delete a session associated with a token
      */
-    deauth: async (): Promise<API_RESPONSE[API_QUERY.POST_SESSION]> => {
+    deauth: async (): Promise<API_RESPONSE[API_QUERY.DELETE_SESSION]> => {
       const requestTimestamp = Date.now()
 
       const response = await useFetch(`${API_BASE}/sessions`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: token.value }),
-      }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.POST_SESSION]>()
+        headers: {
+          'Authorization': `Bearer ${token.value}`,
+        },
+      }, { afterFetch: clearToken, timeout: 3333 }).json<API_RESPONSE[API_QUERY.DELETE_SESSION]>()
 
-      if (requestTimestamp > latestCompletedTimestamps[API_QUERY.POST_SESSION]) {
-        latestCompletedTimestamps[API_QUERY.POST_SESSION] = requestTimestamp
-        return handleErrors<API_QUERY.POST_SESSION>(response)
+      if (requestTimestamp > latestCompletedTimestamps[API_QUERY.DELETE_SESSION]) {
+        latestCompletedTimestamps[API_QUERY.DELETE_SESSION] = requestTimestamp
+        return handleErrors<API_QUERY.DELETE_SESSION>(response)
       }
       return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
     },

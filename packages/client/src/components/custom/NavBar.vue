@@ -15,7 +15,6 @@ import { NIcon, useMessage } from 'naive-ui'
 
 const quest = useAPI()
 const route = useRoute()
-const router = useRouter()
 const message = useMessage()
 const state = useStateStore()
 
@@ -100,7 +99,6 @@ function renderIcon(icon: Component) {
           if (key === 2) {
             quest.deauth()
             message.success('Logged out')
-            router.push('/login')
           }
         }"
       >

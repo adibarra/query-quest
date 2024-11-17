@@ -6,9 +6,9 @@
 const quest = useAPI()
 const router = useRouter()
 const state = useStateStore()
-const activeForm = useStorage<'login' | 'register'>('login-last-form', 'register')
-const rememberMe = useStorage('login-remember-me', false)
-const username = useStorage('login-username', '')
+const activeForm = useStorage<'login' | 'register'>('query-quest/login/last-form', 'register')
+const rememberMe = useStorage('query-quest/login/remember-me', false)
+const username = useStorage('query-quest/login/username', '')
 const password = ref('')
 const confirmPassword = ref('')
 const error = ref('')
@@ -24,14 +24,10 @@ async function handleSubmit() {
       return
     }
 
-    const authResponse = await quest.auth({
+    await quest.auth({
       username: username.value,
       password: password.value,
     })
-
-    if (authResponse.code === API_STATUS.OK) {
-      quest.setToken(authResponse.data.token)
-    }
   }
   else {
     if (!username.value || !password.value || !confirmPassword.value) {
@@ -54,14 +50,10 @@ async function handleSubmit() {
       return
     }
 
-    const authResponse = await quest.auth({
+    await quest.auth({
       username: username.value,
       password: password.value,
     })
-
-    if (authResponse.code === API_STATUS.OK) {
-      quest.setToken(authResponse.data.token)
-    }
   }
 }
 
