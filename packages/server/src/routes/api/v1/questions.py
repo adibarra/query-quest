@@ -46,9 +46,7 @@ class QuestionResponse(BaseModel):
 
 
 @router.get(
-    "/questions",
-    response_model=QuestionResponse,
-    status_code=status.HTTP_200_OK
+    "/questions", response_model=QuestionResponse, status_code=status.HTTP_200_OK
 )
 def get_questions():
     questions = db.get_questions()
@@ -72,9 +70,7 @@ def get_question(question_id: int):
 
 
 @router.post(
-    "/questions",
-    response_model=QuestionResponse,
-    status_code=status.HTTP_201_CREATED
+    "/questions", response_model=QuestionResponse, status_code=status.HTTP_201_CREATED
 )
 def create_question(request: QuestionRequest):
     new_question_data = db.create_question(request)

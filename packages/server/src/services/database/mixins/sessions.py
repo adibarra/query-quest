@@ -2,10 +2,12 @@
 # @description: Database class for handling session database operations
 
 from typing import TYPE_CHECKING, Optional
+
 from helpers.types import SessionDict
 
 if TYPE_CHECKING:
     from psycopg2.pool import SimpleConnectionPool
+
 
 class SessionsMixin:
     """
@@ -14,8 +16,9 @@ class SessionsMixin:
 
     connectionPool: "SimpleConnectionPool"
 
-
-    def get_session(self, user_uuid: Optional[str] = None, token: Optional[str] = None) -> Optional[SessionDict]:
+    def get_session(
+        self, user_uuid: Optional[str] = None, token: Optional[str] = None
+    ) -> Optional[SessionDict]:
         """
         Retrieves the session details based on either the provided session token or the user UUID.
 
@@ -48,7 +51,9 @@ class SessionsMixin:
             conn = self.connectionPool.getconn()
             with conn.cursor() as cursor:
                 if user_uuid:
-                    cursor.execute("SELECT * FROM sessions WHERE user_uuid = %s", (user_uuid,))
+                    cursor.execute(
+                        "SELECT * FROM sessions WHERE user_uuid = %s", (user_uuid,)
+                    )
                 elif token:
                     cursor.execute("SELECT * FROM sessions WHERE token = %s", (token,))
                 conn.commit()
@@ -57,19 +62,22 @@ class SessionsMixin:
                 if not result:
                     return None
 
-                session_data = dict(zip([desc[0] for desc in cursor.description], result))
+                session_data = dict(
+                    zip([desc[0] for desc in cursor.description], result)
+                )
                 return SessionDict(
                     user_uuid=session_data["user_uuid"],
                     token=session_data["token"],
                     created_at=session_data["created_at"],
                 )
         except Exception as e:
-            print(f"Failed to retrieve session for user_uuid {user_uuid} or token {token}:", e, flush=True)
+            print(
+                "Failed to retrieve session due to an unexpected error:", e, flush=True
+            )
             return None
         finally:
             if conn:
                 self.connectionPool.putconn(conn)
-
 
     def create_session(self, user_uuid: str) -> Optional[SessionDict]:
         """
@@ -109,7 +117,9 @@ class SessionsMixin:
                 if not result:
                     return None
 
-                session_data = dict(zip([desc[0] for desc in cursor.description], result))
+                session_data = dict(
+                    zip([desc[0] for desc in cursor.description], result)
+                )
                 return SessionDict(
                     user_uuid=session_data["user_uuid"],
                     token=session_data["token"],
@@ -122,8 +132,9 @@ class SessionsMixin:
             if conn:
                 self.connectionPool.putconn(conn)
 
-
-    def delete_session(self, user_uuid: Optional[str] = None, token: Optional[str] = None) -> bool:
+    def delete_session(
+        self, user_uuid: Optional[str] = None, token: Optional[str] = None
+    ) -> bool:
         """
         Deletes an existing session from the database using either the provided session token or the user UUID.
 
@@ -153,14 +164,18 @@ class SessionsMixin:
             conn = self.connectionPool.getconn()
             with conn.cursor() as cursor:
                 if user_uuid:
-                    cursor.execute("DELETE FROM sessions WHERE user_uuid = %s", (user_uuid,))
+                    cursor.execute(
+                        "DELETE FROM sessions WHERE user_uuid = %s", (user_uuid,)
+                    )
                 elif token:
                     cursor.execute("DELETE FROM sessions WHERE token = %s", (token,))
                 conn.commit()
 
                 return cursor.rowcount > 0
         except Exception as e:
-            print(f"Failed to delete session due to an unexpected error: {e}", flush=True)
+            print(
+                f"Failed to delete session due to an unexpected error: {e}", flush=True
+            )
             return False
         finally:
             if conn:

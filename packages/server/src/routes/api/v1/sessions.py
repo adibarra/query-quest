@@ -7,7 +7,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import UUID4, BaseModel
 
 from helpers.auth import Auth
-from helpers.requireToken import requireToken
+from helpers.requireAuth import requireAuth
 from helpers.types import SessionDict
 from services.database import Database
 
@@ -34,6 +34,7 @@ class SessionResponse(BaseModel):
 
     class Config:
         exclude_none = True
+
 
 @router.post(
     "/sessions", response_model=SessionResponse, status_code=status.HTTP_200_OK
@@ -71,7 +72,7 @@ def create_session(
     "/sessions", response_model=SessionResponse, status_code=status.HTTP_200_OK
 )
 def delete_session(
-    session: SessionDict = Depends(requireToken),
+    session: SessionDict = Depends(requireAuth),
 ):
     if not db.delete_session(token=session["token"]):
         raise HTTPException(

@@ -4,10 +4,12 @@
 from datetime import date
 from typing import Optional, TypedDict
 
+
 class SessionDict(TypedDict):
     user_uuid: str
     token: str
     created_at: date
+
 
 class Question(TypedDict):
     question: str
