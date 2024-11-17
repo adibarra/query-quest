@@ -3,10 +3,12 @@
 
 from typing import Optional
 
-from fastapi import APIRouter, Body, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import UUID4, BaseModel
 
 from helpers.auth import Auth
+from helpers.requireToken import requireToken
+from helpers.types import SessionDict
 from services.database import Database
 
 db = Database()
@@ -32,28 +34,6 @@ class SessionResponse(BaseModel):
 
     class Config:
         exclude_none = True
-
-
-async def authenticate(
-    authorization: str = Header(...),
-) -> tuple[str, str]:
-    if not len(authorization.split(" ")) == 2:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Bad Request",
-        )
-
-    token = authorization.split(" ")[1]
-    token_owner = db.get_session(token)
-
-    # Validate the token exists
-    if token_owner is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized",
-        )
-    return token_owner, token
-
 
 @router.post(
     "/sessions", response_model=SessionResponse, status_code=status.HTTP_200_OK
@@ -91,12 +71,12 @@ def create_session(
     "/sessions", response_model=SessionResponse, status_code=status.HTTP_200_OK
 )
 def delete_session(
-    auth: tuple[str, str] = Depends(authenticate),
+    session: SessionDict = Depends(requireToken),
 ):
-    if not db.delete_session(auth[1]):
+    if not db.delete_session(token=session["token"]):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not Found",
+            detail="Not Found: Session not found",
         )
 
     return SessionResponse(code=200, message="Ok")
