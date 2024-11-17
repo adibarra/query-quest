@@ -224,13 +224,12 @@ export function useAPI(options?: { base?: string }) {
     getQuestion: async (data: { id: number }): Promise<API_RESPONSE[API_QUERY.GET_QUESTION]> => {
       const requestTimestamp = Date.now()
 
-      const response = await useFetch(`${API_BASE}/questions`, {
+      const response = await useFetch(`${API_BASE}/question/${data.id}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token.value}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(removeEmpty(data)),
       }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.GET_QUESTION]>()
 
       if (requestTimestamp > latestCompletedTimestamps[API_QUERY.GET_QUESTION]) {
