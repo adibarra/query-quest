@@ -1,13 +1,11 @@
 # @author: adibarra (Alec Ibarra)
 # @description: Database class for handling session database operations
 
-from typing import TYPE_CHECKING
-
-import psycopg2
+from typing import TYPE_CHECKING, Optional
+from helpers.types import SessionDict
 
 if TYPE_CHECKING:
     from psycopg2.pool import SimpleConnectionPool
-
 
 class SessionsMixin:
     """
@@ -16,15 +14,85 @@ class SessionsMixin:
 
     connectionPool: "SimpleConnectionPool"
 
-    def create_session(self, owner: str) -> dict:
+
+    def get_session(self, user_uuid: Optional[str] = None, token: Optional[str] = None) -> Optional[SessionDict]:
         """
-        Creates a new session in the database.
+        Retrieves the session details based on either the provided session token or the user UUID.
+
+        This method queries the database for a session associated with the given `token` or `user_uuid`.
+        If a session is found, it returns a `SessionDict` containing the session information. If no session
+        is found or an error occurs during the query, it returns `None`.
 
         Args:
-            owner (str): The uuid of the user.
+            user_uuid (Optional[str]): The UUID of the session owner (user). Either this or `token` must be provided.
+            token (Optional[str]): The session token. Either this or `user_uuid` must be provided.
 
         Returns:
-            dict: A dictionary containing information about the newly created session if successful, None otherwise.
+            Optional[SessionDict]:
+                - A `SessionDict` containing the session data if the session exists. The dictionary contains:
+                    - "user_uuid" (str): The UUID of the session owner (user).
+                    - "token" (str): The session token.
+                    - "created_at" (datetime): The timestamp when the session was created or updated.
+                - `None` if the session does not exist or if an error occurs.
+
+        Raises:
+            ValueError: If neither `user_uuid` nor `token` is provided.
+            Exception: For errors that may occur during session retrieval (e.g., database connectivity issues).
+        """
+
+        if not (user_uuid or token):
+            raise ValueError("Either user_uuid or token must be provided")
+
+        conn = None
+        try:
+            conn = self.connectionPool.getconn()
+            with conn.cursor() as cursor:
+                if user_uuid:
+                    cursor.execute("SELECT * FROM sessions WHERE user_uuid = %s", (user_uuid,))
+                elif token:
+                    cursor.execute("SELECT * FROM sessions WHERE token = %s", (token,))
+                conn.commit()
+
+                result = cursor.fetchone()
+                if not result:
+                    return None
+
+                session_data = dict(zip([desc[0] for desc in cursor.description], result))
+                return SessionDict(
+                    user_uuid=session_data["user_uuid"],
+                    token=session_data["token"],
+                    created_at=session_data["created_at"],
+                )
+        except Exception as e:
+            print(f"Failed to retrieve session for user_uuid {user_uuid} or token {token}:", e, flush=True)
+            return None
+        finally:
+            if conn:
+                self.connectionPool.putconn(conn)
+
+
+    def create_session(self, user_uuid: str) -> Optional[SessionDict]:
+        """
+        Creates a new session in the database for the specified user.
+
+        This method inserts a new session into the `sessions` table or updates the existing session
+        if a session already exists for the provided `user_uuid`. The session information, including
+        the token and created_at timestamp, is returned as a `SessionDict`.
+
+        Args:
+            user_uuid (str): The UUID of the user for whom the session is being created.
+
+        Returns:
+            Optional[SessionDict]:
+                - A `SessionDict` containing the session data if the creation or update was successful.
+                  The dictionary contains:
+                    - "user_uuid" (str): The UUID of the session owner (user).
+                    - "token" (str): The generated or updated session token.
+                    - "created_at" (datetime): The timestamp when the session was created or updated.
+                - `None` if the operation failed.
+
+        Raises:
+            Exception: For errors that may occur during session creation (e.g., database connectivity issues).
         """
 
         conn = None
@@ -32,82 +100,68 @@ class SessionsMixin:
             conn = self.connectionPool.getconn()
             with conn.cursor() as cursor:
                 cursor.execute(
-                    "INSERT INTO sessions (owner) VALUES (%s) ON CONFLICT (owner) DO UPDATE SET token = DEFAULT RETURNING *",
-                    (owner,),
+                    "INSERT INTO sessions (user_uuid) VALUES (%s) ON CONFLICT (user_uuid) DO UPDATE SET token = DEFAULT, created_at = DEFAULT RETURNING *",
+                    (user_uuid,),
                 )
-                session_data = cursor.fetchone()
                 conn.commit()
-                if session_data is not None:
-                    column_names = [desc[0] for desc in cursor.description]
-                    return dict(zip(column_names, session_data))
-                else:
-                    print(
-                        "Failed to retrieve session data after insertion.", flush=True
-                    )
+
+                result = cursor.fetchone()
+                if not result:
                     return None
-        except psycopg2.IntegrityError as e:
-            # Check if it's a duplicate key error
-            if "duplicate key value violates unique constraint" in str(e):
-                return None
-            else:
-                raise e
+
+                session_data = dict(zip([desc[0] for desc in cursor.description], result))
+                return SessionDict(
+                    user_uuid=session_data["user_uuid"],
+                    token=session_data["token"],
+                    created_at=session_data["created_at"],
+                )
         except Exception as e:
-            print("Failed to create session:", e, flush=True)
+            print("Failed to create session due to an unexpected error:", e, flush=True)
             return None
         finally:
             if conn:
                 self.connectionPool.putconn(conn)
 
-    def delete_session(self, token: str) -> bool:
+
+    def delete_session(self, user_uuid: Optional[str] = None, token: Optional[str] = None) -> bool:
         """
-        Deletes a session from the database.
+        Deletes an existing session from the database using either the provided session token or the user UUID.
+
+        This method attempts to delete a session from the database based on either the `token` or the `user_uuid`.
+        If either parameter is provided, the session will be deleted. The method commits the transaction and returns
+        `True` if the deletion is successful. If no session is found or an error occurs during the process, it returns `False`.
 
         Args:
-            token (str): The token of the session.
+            user_uuid (Optional[str]): The UUID of the session owner (user) whose session is to be deleted.
+            token (Optional[str]): The session token of the session to be deleted.
 
         Returns:
-            bool: True if successful, False otherwise.
+            bool:
+                - `True` if the session was successfully deleted (either by matching the `user_uuid` or `token`).
+                - `False` if the session could not be deleted due to an error or if no session was found.
+
+        Raises:
+            ValueError: If neither `user_uuid` nor `token` is provided.
+            Exception: For errors that may occur during session deletion (e.g., database connectivity issues).
         """
+
+        if not (user_uuid or token):
+            raise ValueError("Either `user_uuid` or `token` must be provided")
 
         conn = None
         try:
             conn = self.connectionPool.getconn()
             with conn.cursor() as cursor:
-                cursor.execute("DELETE FROM sessions WHERE token = %s", (token,))
+                if user_uuid:
+                    cursor.execute("DELETE FROM sessions WHERE user_uuid = %s", (user_uuid,))
+                elif token:
+                    cursor.execute("DELETE FROM sessions WHERE token = %s", (token,))
                 conn.commit()
-                return True
+
+                return cursor.rowcount > 0
         except Exception as e:
-            print("Failed to delete session:", e, flush=True)
+            print(f"Failed to delete session due to an unexpected error: {e}", flush=True)
             return False
-        finally:
-            if conn:
-                self.connectionPool.putconn(conn)
-
-    def get_session(self, token: str) -> str:
-        """
-        Retrieves the uuid of the session owner.
-
-        Args:
-            token (str): The token of the session.
-
-        Returns:
-            str: The uuid of the session owner if successful, None otherwise.
-        """
-
-        conn = None
-        try:
-            conn = self.connectionPool.getconn()
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT owner FROM sessions WHERE token = %s", (token,))
-                uuid_user = cursor.fetchone()
-                conn.commit()
-                if uuid_user is not None:
-                    return uuid_user[0]
-                else:
-                    return None
-        except Exception as e:
-            print("Failed to get session:", e, flush=True)
-            return None
         finally:
             if conn:
                 self.connectionPool.putconn(conn)
