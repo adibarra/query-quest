@@ -79,7 +79,7 @@ function removeAnswer(index: number) {
         </span>
       </div>
       <div w-full flex flex-col>
-        <div v-for="(answer, index) in answers" :key="index" class="mb-2 w-full flex flex-row items-center gap-2">
+        <div v-for="(_, index) in answers" :key="index" class="mb-2 w-full flex flex-row items-center gap-2">
           <n-input
             v-model:value="answers[index]"
             :placeholder="`Option ${index + 1}`"
