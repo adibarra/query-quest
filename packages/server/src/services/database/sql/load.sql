@@ -3,6 +3,7 @@
 -- Seed some users into the Users table
 INSERT INTO Users (uuid, username, password_hash)
 VALUES
+  ('84d7b46c-3a37-4243-a459-8ce9d1a7f2d6', 'demo', '$argon2id$v=19$m=65536,t=3,p=4$HPOvTEERCj8GLDJnVHN08g$SQrZq5bIOoqxaqqjkYJT7tARXeHBnhzdt382VwwBKtI'),
   ('68c85e40-bbd8-40a1-8b7c-bd1b58bc6d0b', 'bigbenson16', '6eea9b7ef19179a06954edd0f6c05ceb'),
   ('4791e247-4793-4d39-a25b-4f187764773b', 'nartwart0003', 'b7e90aca313e1137f34b439a343cd933'),
   ('b792cde4-19ec-439e-8177-0589434e134b', 'taitaitai', '02c75fb22c75b23dc963c7eb91a062cc'),
@@ -13,6 +14,7 @@ ON CONFLICT (uuid) DO NOTHING;
 -- Seed some statistics into the Statistics table
 INSERT INTO Statistics (user_uuid, xp, wins, losses)
 VALUES
+  ('84d7b46c-3a37-4243-a459-8ce9d1a7f2d6', 50, 10, 2),
   ('68c85e40-bbd8-40a1-8b7c-bd1b58bc6d0b', 160, 5, 6),
   ('4791e247-4793-4d39-a25b-4f187764773b', 170, 6, 5),
   ('b792cde4-19ec-439e-8177-0589434e134b', 90, 4, 1),
@@ -23,6 +25,7 @@ ON CONFLICT (user_uuid) DO NOTHING;
 -- Seed some sessions into the Sessions table
 INSERT INTO Sessions (user_uuid, token)
 VALUES
+  ('84d7b46c-3a37-4243-a459-8ce9d1a7f2d6', '00000000-0000-0000-0000-000000000000'),
   ('68c85e40-bbd8-40a1-8b7c-bd1b58bc6d0b', '6eaa99af-814f-4fc8-8c79-e2516c955af0'),
   ('4791e247-4793-4d39-a25b-4f187764773b', '29c6a90b-8777-4ae4-b167-99ff43562e2b'),
   ('b792cde4-19ec-439e-8177-0589434e134b', 'c85e9d39-8651-4014-b544-d7856fa9627a')
