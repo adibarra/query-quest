@@ -9,8 +9,7 @@ import type { User } from '~/types'
 const quest = useAPI()
 
 export const useStateStore = defineStore('state', () => {
-  // TODO: remove later, override to true for testing
-  const isAuthenticated = computed(() => quest.getToken().length > 0 || true)
+  const isAuthenticated = computed(() => quest.getToken().length > 0)
   const user = ref<User | null>(null)
 
   watch(isAuthenticated, async () => {
