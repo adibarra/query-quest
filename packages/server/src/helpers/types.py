@@ -19,6 +19,7 @@ class Question(TypedDict):
     option3: Optional[str]
     option4: Optional[str]
 
+
 class UserDict(TypedDict):
     uuid: str
     username: str

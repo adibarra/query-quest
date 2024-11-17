@@ -14,7 +14,8 @@ export const useStateStore = defineStore('state', () => {
   const user = ref<User | null>(null)
 
   watch(isAuthenticated, async () => {
-    if (!isAuthenticated.value) return null
+    if (!isAuthenticated.value)
+      return null
 
     const response = await quest.getUser()
     if (response.code === API_STATUS.OK) {
