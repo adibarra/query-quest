@@ -3,9 +3,11 @@
 
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
+from helpers.requireAuth import requireAuth
+from helpers.types import SessionDict
 from services.database import Database
 
 db = Database()
@@ -46,9 +48,13 @@ class QuestionResponse(BaseModel):
 
 
 @router.get(
-    "/questions", response_model=QuestionResponse, status_code=status.HTTP_200_OK
+    "/questions",
+    response_model=QuestionResponse,
+    status_code=status.HTTP_200_OK,
 )
-def get_questions():
+def get_questions(
+    session: SessionDict = Depends(requireAuth),
+):
     questions = db.get_questions()
     return QuestionResponse(code=200, message="Ok", data=questions)
 
@@ -58,7 +64,10 @@ def get_questions():
     response_model=QuestionResponse,
     status_code=status.HTTP_200_OK,
 )
-def get_question(question_id: int):
+def get_question(
+    question_id: int,
+    session: SessionDict = Depends(requireAuth),
+):
     question = db.get_question(question_id)
     if not question:
         raise HTTPException(
@@ -70,9 +79,14 @@ def get_question(question_id: int):
 
 
 @router.post(
-    "/questions", response_model=QuestionResponse, status_code=status.HTTP_201_CREATED
+    "/questions",
+    response_model=QuestionResponse,
+    status_code=status.HTTP_201_CREATED,
 )
-def create_question(request: QuestionRequest):
+def create_question(
+    request: QuestionRequest,
+    session: SessionDict = Depends(requireAuth),
+):
     new_question_data = db.create_question(request)
     if not new_question_data:
         raise HTTPException(
@@ -83,16 +97,19 @@ def create_question(request: QuestionRequest):
     return QuestionResponse(code=201, message="Ok", data=[new_question_data])
 
 
-@router.delete(
-    "/questions/{question_id}",
-    response_model=QuestionResponse,
-    status_code=status.HTTP_200_OK,
-)
-def delete_question(question_id: int):
-    if not db.delete_question(question_id):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Question with id {question_id} not found",
-        )
-
-    return QuestionResponse(code=200, message="Ok")
+# @router.delete(
+#     "/questions/{question_id}",
+#     response_model=QuestionResponse,
+#     status_code=status.HTTP_200_OK,
+# )
+# def delete_question(
+#     question_id: int,
+#     session: SessionDict = Depends(requireAuth),
+# ):
+#     if not db.delete_question(question_id):
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND,
+#             detail=f"Question with id {question_id} not found",
+#         )
+#
+#     return QuestionResponse(code=200, message="Ok")
