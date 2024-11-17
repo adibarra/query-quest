@@ -9,7 +9,10 @@ const token = useSessionStorage('query-quest/token', '')
 
 export enum API_STATUS {
   OK = 200,
+  CREATED = 201,
   BAD_REQUEST = 400,
+  UNAUTHORIZED = 401,
+  FORBIDDEN = 403,
   ERROR = 500,
   TIMEOUT = -1,
   OUTDATED = -2,
@@ -107,7 +110,7 @@ export function useAPI(options?: { base?: string }) {
       const response = await useFetch(`${API_BASE}/sessions`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token.value}`,
+          Authorization: `Bearer ${token.value}`,
         },
       }, { afterFetch: clearToken, timeout: 3333 }).json<API_RESPONSE[API_QUERY.DELETE_SESSION]>()
 
@@ -338,16 +341,16 @@ export function useAPI(options?: { base?: string }) {
   }
 
   interface BaseAPIResponse {
-    code: API_STATUS.ERROR | API_STATUS.BAD_REQUEST | API_STATUS.TIMEOUT | API_STATUS.OUTDATED | API_STATUS.OK
+    code: API_STATUS.ERROR | API_STATUS.BAD_REQUEST | API_STATUS.UNAUTHORIZED | API_STATUS.FORBIDDEN | API_STATUS.TIMEOUT | API_STATUS.OUTDATED | API_STATUS.OK | API_STATUS.CREATED
     message: string
   }
 
   interface BadAPIResponse extends BaseAPIResponse {
-    code: API_STATUS.ERROR | API_STATUS.BAD_REQUEST | API_STATUS.TIMEOUT | API_STATUS.OUTDATED
+    code: API_STATUS.ERROR | API_STATUS.BAD_REQUEST | API_STATUS.UNAUTHORIZED | API_STATUS.FORBIDDEN | API_STATUS.TIMEOUT | API_STATUS.OUTDATED
   }
 
   interface DataAPIResponse<T> extends BaseAPIResponse {
-    code: API_STATUS.OK
+    code: API_STATUS.OK | API_STATUS.CREATED
     message: string
     data: T
   }
