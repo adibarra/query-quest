@@ -4,10 +4,16 @@
  */
 
 import { acceptHMRUpdate, defineStore } from 'pinia'
-import type { User } from '~/types'
 
 export const useStateStore = defineStore('state', () => {
-  const user = ref<User | null>(null)
+  interface UserState{
+    uuid: string
+    username: string
+  }
+  const user = useStorage<UserState>('state-user',{
+    uuid: '',
+    username: '',
+  })
 
   // TODO: remove always true
   const isAuthenticated = computed(() => user.value !== null || true)
@@ -15,7 +21,9 @@ export const useStateStore = defineStore('state', () => {
   return {
     user,
     isAuthenticated,
+
   }
+  
 })
 
 if (import.meta.hot)

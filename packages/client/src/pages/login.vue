@@ -3,18 +3,97 @@
   @description: This component is used to display the login/register page of the application.
 -->
 <script setup lang="ts">
+const { t } = useI18n()
+const router = useRouter()
+const QueryQuest = useAPI()
+const state = useStateStore()
+
 const activeForm = useStorage<'login' | 'register'>('login-last-form', 'register')
 const rememberMe = useStorage('login-remember-me', false)
 const username = useStorage('login-username', '')
 const password = ref('')
 const confirmPassword = ref('')
 const error = ref('')
+const waitForLogin = ref(false)
 
 useHead({
   title: `Login/Register • QueryQuest`,
 })
+// make sure uuid is set before redirecting
+watch(() => [QueryQuest.authenticated.value, waitForLogin.value], () => {
+  if (QueryQuest.authenticated.value && !waitForLogin.value)
+    router.push('/dashboard')
+}, { immediate: true })
 
-async function handleSubmit() { }
+async function handleSubmit() {
+  if (activeForm.value === 'login')
+    await login()
+  else
+    await createAccount()
+ }
+
+ async function createAccount() {
+  if (!username.value || !password.value) {
+    error.value = t('pages.login.missing-credentials')
+    return
+  }
+
+  if (password.value !== confirmPassword.value) {
+    error.value = t('pages.login.password-mismatch')
+    return
+  }
+
+  const createUser = await QueryQuest.createUser({username: username.value, password: password.value })
+  switch (createUser.code) {
+    case 400:
+      error.value = t('pages.login.invalid-registration')
+      break
+    case 200:
+      login()
+      break
+    default:
+      error.value = t('pages.login.unknown-error')
+      break
+  }
+}
+async function login() {
+  if (!username.value || !password.value) {
+    error.value = t('pages.login.missing-credentials')
+    return
+  }
+
+  waitForLogin.value = true
+  const loginResponse = await QueryQuest.auth({ username: username.value, password: password.value })
+
+  switch (loginResponse.code) {
+    case API_STATUS.BAD_REQUEST:
+      error.value = t('pages.login.no-account-found')
+      break
+    case API_STATUS.ERROR:
+      error.value = t('pages.login.invalid-credentials')
+      break
+    case API_STATUS.OK:
+      if (!rememberMe.value) username.value = ''
+
+      // Wrap the variable declaration inside braces to avoid lexical errors
+      {
+        const userResponse = await QueryQuest.getUser()
+        if (userResponse.code === API_STATUS.OK && userResponse.data) {
+          state.user.uuid = userResponse.data.uuid  // Set UUID from fetched user data
+          state.user.username = userResponse.data.username
+        } else {
+          error.value = t('pages.login.unknown-error')
+        }
+      }
+      break
+    default:
+      error.value = t('pages.login.unknown-error')
+      break
+  }
+  waitForLogin.value = false
+}
+
+
 
 function toggleForm() {
   activeForm.value = activeForm.value === 'login' ? 'register' : 'login'

@@ -6,6 +6,7 @@ import type { UseFetchReturn } from '@vueuse/core'
 import type { Question, Stats, Tag, User } from '~/types'
 
 const token = useSessionStorage('query-quest/token', '')
+const authenticated = computed(() => Boolean (token.value))
 
 export enum API_STATUS {
   OK = 200,
@@ -60,6 +61,10 @@ export function useAPI(options?: { base?: string }) {
   }
 
   return {
+    /**
+     * Make sure user is authenticated
+     */
+    authenticated,
     /**
      * Create a new session
      * @param data
