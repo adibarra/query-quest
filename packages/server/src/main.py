@@ -30,7 +30,7 @@ async def validation_exception_handler(request, e: RequestValidationError):
     print("Validation error:", e)
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content={"code": 400, "message": "Bad Request"},
+        content={"code": 400, "message": "Bad Request: Validation Error"},
     )
 
 
