@@ -45,7 +45,7 @@ async function handleSubmit() {
       password: password.value,
     })
 
-    if (userResponse.code !== API_STATUS.OK) {
+    if (userResponse.code !== API_STATUS.CREATED) {
       error.value = userResponse.message
       return
     }
@@ -65,7 +65,8 @@ function toggleForm() {
 }
 
 watch(() => state.isAuthenticated, (isAuthenticated) => {
-  if (!isAuthenticated) return
+  if (!isAuthenticated)
+    return
   router.push('/dashboard')
 })
 </script>
