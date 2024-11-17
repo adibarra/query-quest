@@ -1,14 +1,14 @@
 # @author: adibarra (Alec Ibarra)
 # @description: Types for the server
 
-from datetime import date
+from datetime import datetime
 from typing import Optional, TypedDict
 
 
 class SessionDict(TypedDict):
     user_uuid: str
     token: str
-    created_at: date
+    created_at: datetime
 
 
 class Question(TypedDict):
@@ -18,3 +18,8 @@ class Question(TypedDict):
     option2: str
     option3: Optional[str]
     option4: Optional[str]
+
+class UserDict(TypedDict):
+    uuid: str
+    username: str
+    password_hash: str

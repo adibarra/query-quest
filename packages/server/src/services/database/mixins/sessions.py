@@ -52,10 +52,22 @@ class SessionsMixin:
             with conn.cursor() as cursor:
                 if user_uuid:
                     cursor.execute(
-                        "SELECT * FROM sessions WHERE user_uuid = %s", (user_uuid,)
+                        """
+                        SELECT *
+                        FROM sessions
+                        WHERE user_uuid = %s
+                        """,
+                        (user_uuid,)
                     )
                 elif token:
-                    cursor.execute("SELECT * FROM sessions WHERE token = %s", (token,))
+                    cursor.execute(
+                        """
+                        SELECT *
+                        FROM sessions
+                        WHERE token = %s
+                        """,
+                        (token,)
+                    )
                 conn.commit()
 
                 result = cursor.fetchone()
@@ -108,7 +120,13 @@ class SessionsMixin:
             conn = self.connectionPool.getconn()
             with conn.cursor() as cursor:
                 cursor.execute(
-                    "INSERT INTO sessions (user_uuid) VALUES (%s) ON CONFLICT (user_uuid) DO UPDATE SET token = DEFAULT, created_at = DEFAULT RETURNING *",
+                    """
+                    INSERT INTO sessions (user_uuid, token, created_at)
+                    VALUES (%s, gen_random_uuid(), NOW())
+                    ON CONFLICT (user_uuid)
+                    DO UPDATE SET token = gen_random_uuid(), created_at = NOW()
+                    RETURNING *
+                    """,
                     (user_uuid,),
                 )
                 conn.commit()
@@ -165,10 +183,20 @@ class SessionsMixin:
             with conn.cursor() as cursor:
                 if user_uuid:
                     cursor.execute(
-                        "DELETE FROM sessions WHERE user_uuid = %s", (user_uuid,)
+                        """
+                        DELETE FROM sessions
+                        WHERE user_uuid = %s
+                        """,
+                        (user_uuid,)
                     )
                 elif token:
-                    cursor.execute("DELETE FROM sessions WHERE token = %s", (token,))
+                    cursor.execute(
+                        """
+                        DELETE FROM sessions
+                        WHERE token = %s
+                        """,
+                        (token,)
+                    )
                 conn.commit()
 
                 return cursor.rowcount > 0

@@ -1,6 +1,7 @@
 # @author: adibarra (Alec Ibarra)
 # @description: Sessions routes for the API
 
+from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
@@ -18,8 +19,9 @@ router = APIRouter(
 
 
 class SessionData(BaseModel):
-    owner: UUID4
+    user_uuid: UUID4
     token: UUID4
+    created_at: datetime
 
 
 class SessionRequest(BaseModel):
@@ -42,27 +44,24 @@ class SessionResponse(BaseModel):
 def create_session(
     data: SessionRequest = Body(...),
 ):
-    # Check if user exists
-    user = db.get_user_by_username(data.username)
+    user = db.get_user(username=data.username)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not Found",
+            detail="Not Found: User not found",
         )
 
-    # Verify password
     if not Auth.verify_password(data.password, user["password_hash"]):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Forbidden",
+            detail="Forbidden: Incorrect password",
         )
 
-    # User has been authenticated, create a session
     session = db.create_session(str(user["uuid"]))
     if session is None:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal Server Error",
+            detail="Internal Server Error: Could not create session",
         )
 
     return SessionResponse(code=200, message="Ok", data=session)
