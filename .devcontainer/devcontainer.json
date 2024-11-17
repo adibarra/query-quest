@@ -5,12 +5,16 @@
 
 {
   "name": "query-quest",
-  "image": "mcr.microsoft.com/devcontainers/base:alpine",
+  "image": "mcr.microsoft.com/devcontainers/base:jammy",
   "workspaceFolder": "/workspaces/query-quest",
   "features": {
-    "ghcr.io/adibarra/devcontainer-features/alpine-nvm:1": {},
-    "./local-features/python": {
-      /* From: https://github.com/devcontainers/features/pull/1015 */
+    "ghcr.io/devcontainers/features/node:1": {
+      "nodeGypDependencies": true,
+      "version": "lts",
+      "nvmVersion": "latest"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "latest",
       "installTools": false
     }
   },
@@ -31,6 +35,7 @@
         "github.vscode-pull-request-github",
         "johnsoncodehk.vscode-tsconfig-helper",
         "ms-azuretools.vscode-docker",
+        "ms-python.python",
         "streetsidesoftware.code-spell-checker",
         "vue.volar"
       ]
