@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS Questions(
 
 -- Table that holds information about user accounts
 CREATE TABLE IF NOT EXISTS Users(
-  uuid CHAR(36) NOT NULL,
+  uuid CHAR(36) DEFAULT gen_random_uuid() NOT NULL,
   username VARCHAR(16) UNIQUE NOT NULL,
   password_hash VARCHAR(100) NOT NULL,
   PRIMARY KEY (uuid)
@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS Users(
 -- Table that keeps track of logged in users
 CREATE TABLE IF NOT EXISTS Sessions(
   user_uuid CHAR(36) NOT NULL,
-  token CHAR(36) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  token CHAR(36) DEFAULT gen_random_uuid() NOT NULL,
+  created_at TIMESTAMP DEFAULT now() NOT NULL,
   PRIMARY KEY (user_uuid),
   FOREIGN KEY (user_uuid)
     REFERENCES users(uuid)

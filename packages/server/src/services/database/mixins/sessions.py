@@ -121,10 +121,10 @@ class SessionsMixin:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO sessions (user_uuid, token, created_at)
-                    VALUES (%s, gen_random_uuid(), NOW())
+                    INSERT INTO sessions (user_uuid)
+                    VALUES (%s)
                     ON CONFLICT (user_uuid)
-                    DO UPDATE SET token = gen_random_uuid(), created_at = NOW()
+                    DO UPDATE SET token = gen_random_uuid(), created_at = now()
                     RETURNING *
                     """,
                     [user_uuid],
