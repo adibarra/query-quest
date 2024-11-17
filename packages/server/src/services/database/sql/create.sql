@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS Questions(
 CREATE TABLE IF NOT EXISTS Users(
   uuid CHAR(36) NOT NULL,
   username VARCHAR(16) UNIQUE NOT NULL,
-  password_hash VARCHAR(50) NOT NULL,
+  password_hash VARCHAR(100) NOT NULL,
   PRIMARY KEY (uuid)
 );
 
