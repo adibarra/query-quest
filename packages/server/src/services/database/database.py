@@ -10,6 +10,7 @@ from config import SERVICE_POSTGRES_URI
 
 # import all mixins here
 from services.database.mixins.meta import MetaMixin
+from services.database.mixins.questions import QuestionsMixin
 from services.database.mixins.sessions import SessionsMixin
 
 
@@ -17,6 +18,7 @@ from services.database.mixins.sessions import SessionsMixin
 class Database(
     MetaMixin,
     SessionsMixin,
+    QuestionsMixin,
     object,
 ):
     """
