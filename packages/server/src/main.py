@@ -24,18 +24,9 @@ app.add_middleware(
 )
 
 
-@app.exception_handler(404)
-async def not_found_exception_handler(request, e):
-    print("Not found error:", e)
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content={"code": 404, "message": "Not Found"},
-    )
-
-
 @app.exception_handler(ValidationError)
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, e):
+async def validation_exception_handler(request, e: RequestValidationError):
     print("Validation error:", e)
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
@@ -44,11 +35,11 @@ async def validation_exception_handler(request, e):
 
 
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request, e):
+async def http_exception_handler(request, e: HTTPException):
     print("HTTP error:", e)
     return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"code": 500, "message": "Internal Server Error"},
+        status_code=e.status_code,
+        content={"code": e.status_code, "message": e.detail},
     )
 
 
