@@ -229,11 +229,11 @@ watch(() => route.query.id, () => {
       </div>
     </div>
 
-    <div v-if="state === 'options'"  flex flex-col items-center>
+    <div v-if="state === 'options'" flex flex-col items-center>
       <div mb-4 text-2xl font-semibold>
         {{ currentQuestion.question }}
       </div>
-        <div flex flex-wrap justify-center gap-2.5>
+      <div flex flex-wrap justify-center gap-2.5>
         <NButton
           v-for="option in scrambledOptions"
           :key="option"
