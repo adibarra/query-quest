@@ -1,8 +1,14 @@
-from datetime import datetime
+# @author: chipterpill
+# @description: The user routes for the API.
+
 from typing import Optional
-from fastapi import APIRouter, Body, Depends, Header, HTTPException, Path, status
-from helpers.auth import Auth
+
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, status
 from pydantic import UUID4, BaseModel
+
+from helpers.auth import Auth
+from helpers.requireAuth import requireAuth
+from helpers.types import SessionDict
 from services.database import Database
 
 db = Database()
@@ -36,118 +42,67 @@ class UserResponse(BaseModel):
         exclude_none = True
 
 
-async def authenticateToken(
-    authorization: str = Header(...),
-) -> tuple[str, str]:
-    if not len(authorization.split(" ")) == 2:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Bad Request",
-        )
-
-    token = authorization.split(" ")[1]
-    token_owner = db.get_session(token)
-
-    # Validate the token exists
-    if token_owner is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized",
-        )
-
-    return token_owner, token
-
-
-async def authenticate(
-    authorization: str = Header(...),
-    uuid: str = Path(...),
-) -> tuple[str, str]:
-    token_owner, token = await authenticateToken(authorization)
-
-    # Validate the token has permission for this resource
-    if str(token_owner) != str(uuid):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Forbidden",
-        )
-
-    return token_owner, token
-
-
-@router.post("/users", response_model=UserResponse, status_code=status.HTTP_200_OK)
-@router.post("/users", response_model=UserResponse, status_code=status.HTTP_200_OK)
-@router.post("/users", response_model=UserResponse, status_code=status.HTTP_200_OK)
-@router.post("/users", response_model=UserResponse, status_code=status.HTTP_200_OK)
+@router.post(
+    "/users",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def create_user(data: CreateUserRequest = Body(...)):
-    # Validate username and password
     try:
         Auth.validate_username(data.username)
         Auth.validate_password(data.password)
-    except ValueError as e:
-        print(f"Validation error: {e}", flush=True)
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Bad Request",
+            detail="Bad Request: Username or password invalid",
         )
 
-    # Attempt creating user
     user = db.create_user(data.username, Auth.hash_password(data.password))
-
-    # Check for errors in user creation
-    if user is None or "uuid" not in user:
-        print("User creation conflict or missing UUID", flush=True)
+    if user is None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Conflict",
+            detail="Conflict: User already exists",
         )
 
-    print(f"User created successfully: {user}", flush=True)
-    return UserResponse(
-        code=200,
-        message="Ok",
-        data=UserData(uuid=user["uuid"], username=user["username"]),
-    )
+    return UserResponse(code=201, message="Created", data=user)
 
 
 @router.get(
-    "/users/{uuid}", response_model=UserResponse, status_code=status.HTTP_200_OK
+    "/users/{uuid}",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
 )
 def get_user(
     uuid: UUID4 = Path(...),
-    auth: tuple[str, str] = Depends(authenticate),
+    session: SessionDict = Depends(requireAuth),
 ):
-    # Attempt fetching user
-    user_data = db.get_user(str(uuid))
-    if user_data is None:
+    if str(uuid) != session["user_uuid"]:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not Found",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden: User does not have permission",
         )
 
-    return UserResponse(
-        code=200,
-        message="Ok",
-        data=user_data,
-    )
+    user = db.get_user(uuid=str(uuid))
+    user["password_hash"] = None
+    return UserResponse(code=200, message="Ok", data=user)
 
 
 @router.patch(
-    "/users/{uuid}", response_model=UserResponse, status_code=status.HTTP_200_OK
+    "/users/{uuid}",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
 )
 def patch_user(
     uuid: UUID4 = Path(...),
     data: UpdateUserRequest = Body(...),
-    auth: tuple[str, str] = Depends(authenticate),
+    session: SessionDict = Depends(requireAuth),
 ):
-    # Attempt fetching user
-    user = db.get_user(str(uuid))
-    if user is None:
+    if str(uuid) != session["user_uuid"]:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not Found",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden: User does not have permission",
         )
 
-    # Validate and update fields if present
     try:
         if data.username is not None:
             Auth.validate_username(data.username)
@@ -156,10 +111,10 @@ def patch_user(
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Bad Request",
+            detail="Bad Request: Username or password invalid",
         )
 
-    # Attempt updating user
+    # TODO: db.update_user does not exist
     if not db.update_user(
         str(uuid),
         data.username,
@@ -170,30 +125,27 @@ def patch_user(
             detail="Conflict",
         )
 
-    return UserResponse(
-        code=200,
-        message="Ok",
-        data=user,
-    )
+    user = db.get_user(uuid=str(uuid))
+    user["password_hash"] = None
+    return UserResponse(code=200, message="Ok", data=user)
 
 
 @router.delete(
-    "/users/{uuid}", response_model=UserResponse, status_code=status.HTTP_200_OK
+    "/users/{uuid}",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
 )
 def delete_user(
     uuid: UUID4 = Path(...),
-    auth: tuple[str, str] = Depends(authenticate),
+    session: SessionDict = Depends(requireAuth),
 ):
-    # Check if the user exists
-    user = db.get_user(str(uuid))
-    if user is None:
+    if str(uuid) != session["user_uuid"]:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not Found",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden: User does not have permission",
         )
 
-    # Attempt deleting user
-    if not db.delete_user(str(uuid)):
+    if not db.delete_user(uuid=str(uuid)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
