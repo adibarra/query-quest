@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import psycopg2
 
-from helpers.types import Question
+from helpers.types import QuestionDict
 
 if TYPE_CHECKING:
     from psycopg2.pool import SimpleConnectionPool
@@ -87,7 +87,7 @@ class QuestionsMixin:
             if conn:
                 self.connectionPool.putconn(conn)
 
-    def create_question(self, question: Question) -> dict | None:
+    def create_question(self, question: QuestionDict) -> dict | None:
         """
         Creates a new question in the database.
 

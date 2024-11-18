@@ -11,13 +11,19 @@ class SessionDict(TypedDict):
     created_at: datetime
 
 
-class Question(TypedDict):
+class QuestionDict(TypedDict):
     question: str
     difficulty: int
     option1: str
     option2: str
     option3: Optional[str]
     option4: Optional[str]
+
+
+class TagDict(TypedDict):
+    id: int
+    name: str
+    description: str
 
 
 class UserDict(TypedDict):
