@@ -26,7 +26,6 @@ export const useStateStore = defineStore('state', () => {
   return {
     user,
     isAuthenticated,
-
   }
 })
 
