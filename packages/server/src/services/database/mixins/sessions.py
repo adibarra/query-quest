@@ -85,9 +85,7 @@ class SessionsMixin:
                     created_at=session_data["created_at"],
                 )
         except Exception as e:
-            print(
-                "Failed to retrieve session due to an unexpected error:", e, flush=True
-            )
+            print("Failed to retrieve session:", e, flush=True)
             return None
         finally:
             if conn:
@@ -146,9 +144,7 @@ class SessionsMixin:
 
                 return cursor.rowcount > 0
         except Exception as e:
-            print(
-                f"Failed to delete session due to an unexpected error: {e}", flush=True
-            )
+            print(f"Failed to delete session: {e}", flush=True)
             return False
         finally:
             if conn:
@@ -210,7 +206,7 @@ class SessionsMixin:
                     created_at=session_data["created_at"],
                 )
         except Exception as e:
-            print("Failed to create session due to an unexpected error:", e, flush=True)
+            print("Failed to create session:", e, flush=True)
             return None
         finally:
             if conn:
