@@ -15,11 +15,11 @@ ON CONFLICT (uuid) DO NOTHING;
 INSERT INTO Statistics (user_uuid, xp, wins, losses)
 VALUES
   ('00000000-0000-4444-8888-000000000000', 104, 10, 2),
-  ('68c85e40-bbd8-40a1-8b7c-bd1b58bc6d0b', 160, 5, 6),
-  ('4791e247-4793-4d39-a25b-4f187764773b', 170, 6, 5),
-  ('b792cde4-19ec-439e-8177-0589434e134b', 90, 4, 1),
-  ('903ef56e-4b2c-4b33-9db0-34334c2ff648', 90, 3, 3),
-  ('4c209efd-f156-44d9-b6ab-d96c0749864c', 20, 1, 0)
+  ('68c85e40-bbd8-40a1-8b7c-bd1b58bc6d0b', 62, 5, 6),
+  ('4791e247-4793-4d39-a25b-4f187764773b', 70, 6, 5),
+  ('b792cde4-19ec-439e-8177-0589434e134b', 42, 4, 1),
+  ('903ef56e-4b2c-4b33-9db0-34334c2ff648', 36, 3, 3),
+  ('4c209efd-f156-44d9-b6ab-d96c0749864c', 10, 1, 0)
 ON CONFLICT (user_uuid) DO NOTHING;
 
 -- Seed some sessions into the Sessions table
