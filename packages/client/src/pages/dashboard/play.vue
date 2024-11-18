@@ -56,7 +56,7 @@ function selectAnswer(answer: string) {
 }
 
 function loadRandomQuestion() {
-  const randomIndex = Math.floor(Math.random() * 40)
+  const randomIndex = Math.floor(Math.random() * 39) + 1
   router.push({ query: { id: randomIndex.toString() } })
 }
 
@@ -66,7 +66,8 @@ function goToDashboard() {
 
 watch(() => route.query.id, async () => {
   state.value = 'waiting'
-  const id = Number(route.query.id) || 0
+  question.value = null
+  const id = Number(route.query.id) || 1
   const response = await quest.getQuestion({ id })
   if (response.code === API_STATUS.OK) {
     question.value = response.data[0]
