@@ -17,7 +17,9 @@ class SessionsMixin:
     connectionPool: "SimpleConnectionPool"
 
     def get_session(
-        self, user_uuid: Optional[str] = None, token: Optional[str] = None
+        self,
+        user_uuid: Optional[str] = None,
+        token: Optional[str] = None,
     ) -> Optional[SessionDict]:
         """
         Retrieves the session details based on either the provided session token or the user UUID.
@@ -91,7 +93,71 @@ class SessionsMixin:
             if conn:
                 self.connectionPool.putconn(conn)
 
-    def create_session(self, user_uuid: str) -> Optional[SessionDict]:
+    def delete_session(
+        self,
+        user_uuid: Optional[str] = None,
+        token: Optional[str] = None,
+    ) -> bool:
+        """
+        Deletes an existing session from the database using either the provided session token or the user UUID.
+
+        This method attempts to delete a session from the database based on either the `token` or the `user_uuid`.
+        If either parameter is provided, the session will be deleted. The method commits the transaction and returns
+        `True` if the deletion is successful. If no session is found or an error occurs during the process, it returns `False`.
+
+        Args:
+            user_uuid (Optional[str]): The UUID of the session owner (user) whose session is to be deleted.
+            token (Optional[str]): The session token of the session to be deleted.
+
+        Returns:
+            bool:
+                - `True` if the session was successfully deleted (either by matching the `user_uuid` or `token`).
+                - `False` if the session could not be deleted due to an error or if no session was found.
+
+        Raises:
+            ValueError: If neither `user_uuid` nor `token` is provided.
+            Exception: For errors that may occur during session deletion (e.g., database connectivity issues).
+        """
+
+        if not (user_uuid or token):
+            raise ValueError("Either `user_uuid` or `token` must be provided")
+
+        conn = None
+        try:
+            conn = self.connectionPool.getconn()
+            with conn.cursor() as cursor:
+                if user_uuid:
+                    cursor.execute(
+                        """
+                        DELETE FROM sessions
+                        WHERE user_uuid = %s
+                        """,
+                        [user_uuid],
+                    )
+                elif token:
+                    cursor.execute(
+                        """
+                        DELETE FROM sessions
+                        WHERE token = %s
+                        """,
+                        [token],
+                    )
+                conn.commit()
+
+                return cursor.rowcount > 0
+        except Exception as e:
+            print(
+                f"Failed to delete session due to an unexpected error: {e}", flush=True
+            )
+            return False
+        finally:
+            if conn:
+                self.connectionPool.putconn(conn)
+
+    def create_session(
+        self,
+        user_uuid: str,
+    ) -> Optional[SessionDict]:
         """
         Creates a new session in the database for the specified user.
 
@@ -146,65 +212,6 @@ class SessionsMixin:
         except Exception as e:
             print("Failed to create session due to an unexpected error:", e, flush=True)
             return None
-        finally:
-            if conn:
-                self.connectionPool.putconn(conn)
-
-    def delete_session(
-        self, user_uuid: Optional[str] = None, token: Optional[str] = None
-    ) -> bool:
-        """
-        Deletes an existing session from the database using either the provided session token or the user UUID.
-
-        This method attempts to delete a session from the database based on either the `token` or the `user_uuid`.
-        If either parameter is provided, the session will be deleted. The method commits the transaction and returns
-        `True` if the deletion is successful. If no session is found or an error occurs during the process, it returns `False`.
-
-        Args:
-            user_uuid (Optional[str]): The UUID of the session owner (user) whose session is to be deleted.
-            token (Optional[str]): The session token of the session to be deleted.
-
-        Returns:
-            bool:
-                - `True` if the session was successfully deleted (either by matching the `user_uuid` or `token`).
-                - `False` if the session could not be deleted due to an error or if no session was found.
-
-        Raises:
-            ValueError: If neither `user_uuid` nor `token` is provided.
-            Exception: For errors that may occur during session deletion (e.g., database connectivity issues).
-        """
-
-        if not (user_uuid or token):
-            raise ValueError("Either `user_uuid` or `token` must be provided")
-
-        conn = None
-        try:
-            conn = self.connectionPool.getconn()
-            with conn.cursor() as cursor:
-                if user_uuid:
-                    cursor.execute(
-                        """
-                        DELETE FROM sessions
-                        WHERE user_uuid = %s
-                        """,
-                        [user_uuid],
-                    )
-                elif token:
-                    cursor.execute(
-                        """
-                        DELETE FROM sessions
-                        WHERE token = %s
-                        """,
-                        [token],
-                    )
-                conn.commit()
-
-                return cursor.rowcount > 0
-        except Exception as e:
-            print(
-                f"Failed to delete session due to an unexpected error: {e}", flush=True
-            )
-            return False
         finally:
             if conn:
                 self.connectionPool.putconn(conn)
