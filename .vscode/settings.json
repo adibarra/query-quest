@@ -60,6 +60,7 @@
     "putconn",
     "pycache",
     "pydantic",
+    "PYTHONPATH",
     "queryquest",
     "resourcemonitor",
     "seedrandom",
