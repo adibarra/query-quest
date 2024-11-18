@@ -6,7 +6,6 @@ import type { AfterFetchContext, UseFetchReturn } from '@vueuse/core'
 import type { Question, Session, Stats, Tag, User } from '~/types'
 
 const token = useSessionStorage('query-quest/token', '')
-const authenticated = computed(() => Boolean (token.value))
 
 export enum API_STATUS {
   OK = 200,
