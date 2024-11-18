@@ -129,8 +129,8 @@ onMounted(async () => {
     </div>
 
     <div v-else-if="tagQuery" mt-4>
-      <p text--c-inverse italic>
-        No questions found for tags: {{ tagQuery }}
+      <p text-red font-600>
+        No questions found with all selected tags.
       </p>
     </div>
   </main>
