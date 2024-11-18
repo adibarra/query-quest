@@ -17,7 +17,9 @@ class UsersMixin:
     connectionPool: "SimpleConnectionPool"
 
     def get_user(
-        self, uuid: Optional[str] = None, username: Optional[str] = None
+        self,
+        uuid: Optional[str] = None,
+        username: Optional[str] = None,
     ) -> Optional[UserDict]:
         """
         Retrieves user details based on either the provided UUID or username.
@@ -87,7 +89,9 @@ class UsersMixin:
                 self.connectionPool.putconn(conn)
 
     def delete_user(
-        self, uuid: Optional[str] = None, username: Optional[str] = None
+        self,
+        uuid: Optional[str] = None,
+        username: Optional[str] = None,
     ) -> bool:
         """
         Deletes a user from the database based on either the provided UUID or username.
@@ -142,7 +146,9 @@ class UsersMixin:
                 self.connectionPool.putconn(conn)
 
     def create_user(
-        self, username: str, password_hash: str
+        self,
+        username: str,
+        password_hash: str,
     ) -> Optional[UserDict]:
         """
         Creates a new user in the database.
