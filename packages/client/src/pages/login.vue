@@ -85,10 +85,8 @@ function toggleForm() {
     confirmPassword.value = ''
 }
 
-watch(() => state.isAuthenticated, (isAuthenticated) => {
-  if (!isAuthenticated)
-    return
-  router.push('/dashboard')
+watch(() => state.isAuthenticated, (auth) => {
+  auth && router.push('/dashboard')
 }, { immediate: true })
 </script>
 

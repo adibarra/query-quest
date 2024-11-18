@@ -2,10 +2,10 @@
  * @author: adibarra (Alec Ibarra)
  * @description: Composable for providing access to the QueryQuest API
  */
-import type { AfterFetchContext, UseFetchReturn } from '@vueuse/core'
+import { type AfterFetchContext, type OnFetchErrorContext, StorageSerializers, type UseFetchReturn } from '@vueuse/core'
 import type { Question, Session, Stats, Tag, User } from '~/types'
 
-const token = useSessionStorage('query-quest/token', '')
+const session = useSessionStorage<Session | null>('query-quest/session', null, { serializer: StorageSerializers.object })
 
 export enum API_STATUS {
   OK = 200,
@@ -66,21 +66,21 @@ export function useAPI(options?: { base?: string }) {
     [API_QUERY.SUBMIT_ANSWER]: 0,
   }
 
-  function setToken(ctx: AfterFetchContext) {
-    token.value = ctx.data.data.token
+  function setSession(ctx: AfterFetchContext) {
+    session.value = ctx.data.data
     return ctx
   }
 
-  function clearToken(ctx: AfterFetchContext) {
-    token.value = ''
+  function clearSession(ctx: AfterFetchContext | OnFetchErrorContext) {
+    session.value = null
     return ctx
   }
 
   return {
     /**
-     * Get the API token
+     * Get the current session
      */
-    getToken: () => token.value,
+    getSession: () => session.value,
     /**
      * Create a new session
      * @param data
@@ -95,7 +95,7 @@ export function useAPI(options?: { base?: string }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(removeEmpty(data)),
-      }, { afterFetch: setToken, timeout: 3333 }).json<API_RESPONSE[API_QUERY.POST_SESSION]>()
+      }, { afterFetch: setSession, timeout: 3333 }).json<API_RESPONSE[API_QUERY.POST_SESSION]>()
 
       if (requestTimestamp > latestCompletedTimestamps[API_QUERY.POST_SESSION]) {
         latestCompletedTimestamps[API_QUERY.POST_SESSION] = requestTimestamp
@@ -112,9 +112,9 @@ export function useAPI(options?: { base?: string }) {
       const response = await useFetch(`${API_BASE}/sessions`, {
         method: 'DELETE',
         headers: {
-          Authorization: `Bearer ${token.value}`,
+          Authorization: `Bearer ${session.value?.token}`,
         },
-      }, { afterFetch: clearToken, timeout: 3333 }).json<API_RESPONSE[API_QUERY.DELETE_SESSION]>()
+      }, { afterFetch: clearSession, onFetchError: clearSession, timeout: 3333 }).json<API_RESPONSE[API_QUERY.DELETE_SESSION]>()
 
       if (requestTimestamp > latestCompletedTimestamps[API_QUERY.DELETE_SESSION]) {
         latestCompletedTimestamps[API_QUERY.DELETE_SESSION] = requestTimestamp
@@ -146,15 +146,17 @@ export function useAPI(options?: { base?: string }) {
     },
     /**
      * Get the user's information
+     * @param data
+     * @param data.uuid The user's uuid
      * @returns a user object if successful
      */
-    getUser: async (): Promise<API_RESPONSE[API_QUERY.GET_USER]> => {
+    getUser: async (data: { uuid: string }): Promise<API_RESPONSE[API_QUERY.GET_USER]> => {
       const requestTimestamp = Date.now()
 
-      const response = await useFetch(`${API_BASE}/users`, {
+      const response = await useFetch(`${API_BASE}/users/${data.uuid}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token.value}`,
+          'Authorization': `Bearer ${session.value?.token}`,
           'Content-Type': 'application/json',
         },
       }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.GET_USER]>()
@@ -178,7 +180,7 @@ export function useAPI(options?: { base?: string }) {
       const response = await useFetch(`${API_BASE}/users`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${token.value}`,
+          'Authorization': `Bearer ${session.value?.token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(removeEmpty(data)),
@@ -199,7 +201,7 @@ export function useAPI(options?: { base?: string }) {
       const response = await useFetch(`${API_BASE}/users`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token.value}`,
+          'Authorization': `Bearer ${session.value?.token}`,
           'Content-Type': 'application/json',
         },
       }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.DELETE_USER]>()
@@ -224,7 +226,7 @@ export function useAPI(options?: { base?: string }) {
       const response = await useFetch(`${API_BASE}/questions`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token.value}`,
+          'Authorization': `Bearer ${session.value?.token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(removeEmpty(data)),
@@ -247,7 +249,7 @@ export function useAPI(options?: { base?: string }) {
       const response = await useFetch(`${API_BASE}/question/${data.id}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token.value}`,
+          'Authorization': `Bearer ${session.value?.token}`,
           'Content-Type': 'application/json',
         },
       }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.GET_QUESTION]>()
@@ -267,7 +269,7 @@ export function useAPI(options?: { base?: string }) {
       const response = await useFetch(`${API_BASE}/questions`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token.value}`,
+          'Authorization': `Bearer ${session.value?.token}`,
           'Content-Type': 'application/json',
         },
       }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.GET_QUESTIONS]>()
@@ -284,7 +286,7 @@ export function useAPI(options?: { base?: string }) {
       const response = await useFetch(`${API_BASE}/tags`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token.value}`,
+          'Authorization': `Bearer ${session.value?.token}`,
           'Content-Type': 'application/json',
         },
       }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.GET_TAGS]>()
@@ -301,7 +303,7 @@ export function useAPI(options?: { base?: string }) {
       const response = await useFetch(`${API_BASE}/stats`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token.value}`,
+          'Authorization': `Bearer ${session.value?.token}`,
           'Content-Type': 'application/json',
         },
       }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.GET_STATS]>()
@@ -318,7 +320,7 @@ export function useAPI(options?: { base?: string }) {
       const response = await useFetch(`${API_BASE}/answers`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token.value}`,
+          'Authorization': `Bearer ${session.value?.token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(removeEmpty(data)),

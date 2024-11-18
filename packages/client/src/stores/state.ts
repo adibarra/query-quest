@@ -4,28 +4,37 @@
  */
 
 import { acceptHMRUpdate, defineStore } from 'pinia'
-import type { User } from '~/types'
+import type { Stats, User } from '~/types'
 
 const quest = useAPI()
 
 export const useStateStore = defineStore('state', () => {
-  const isAuthenticated = computed(() => quest.getToken().length > 0)
+  const isAuthenticated = computed(() => !!quest.getSession())
   const user = ref<User | null>(null)
+  const stats = ref<Stats | null>(null)
+
+  async function refreshUser() {
+    if (isAuthenticated.value) {
+      const uuid = quest.getSession()!.user_uuid
+      const response = await quest.getUser({ uuid })
+        if (response.code === API_STATUS.OK) {
+          user.value = response.data
+          return
+        }
+    }
+    user.value = null
+    await quest.deauth()
+  }
 
   watch(isAuthenticated, async () => {
-    if (!isAuthenticated.value)
-      return null
-
-    const response = await quest.getUser()
-    if (response.code === API_STATUS.OK) {
-      return response.data
-    }
-    return null
+    await refreshUser()
   }, { immediate: true })
 
   return {
-    user,
     isAuthenticated,
+    user,
+    stats,
+    refreshUser,
   }
 })
 
