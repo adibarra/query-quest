@@ -213,6 +213,28 @@ export function useAPI(options?: { base?: string }) {
       return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
     },
     /**
+     * Get the user's stats
+     * @param data
+     * @param data.uuid The user's uuid
+     */
+    getStats: async (data: { uuid: string }): Promise<API_RESPONSE[API_QUERY.GET_STATS]> => {
+      const requestTimestamp = Date.now()
+
+      const response = await useFetch(`${API_BASE}/stats/${data.uuid}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${session.value?.token}`,
+          'Content-Type': 'application/json',
+        },
+      }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.GET_STATS]>()
+
+      if (requestTimestamp > latestCompletedTimestamps[API_QUERY.GET_STATS]) {
+        latestCompletedTimestamps[API_QUERY.GET_STATS] = requestTimestamp
+        return handleErrors<API_QUERY.GET_STATS>(response)
+      }
+      return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
+    },
+    /**
      * Create a new question
      * @param data
      * @param data.question The question
@@ -280,6 +302,9 @@ export function useAPI(options?: { base?: string }) {
       }
       return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
     },
+    /**
+     * Get all tags
+     */
     getTags: async (): Promise<API_RESPONSE[API_QUERY.GET_TAGS]> => {
       const requestTimestamp = Date.now()
 
@@ -297,24 +322,13 @@ export function useAPI(options?: { base?: string }) {
       }
       return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
     },
-    getStats: async (): Promise<API_RESPONSE[API_QUERY.GET_STATS]> => {
-      const requestTimestamp = Date.now()
-
-      const response = await useFetch(`${API_BASE}/stats`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${session.value?.token}`,
-          'Content-Type': 'application/json',
-        },
-      }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.GET_STATS]>()
-
-      if (requestTimestamp > latestCompletedTimestamps[API_QUERY.GET_STATS]) {
-        latestCompletedTimestamps[API_QUERY.GET_STATS] = requestTimestamp
-        return handleErrors<API_QUERY.GET_STATS>(response)
-      }
-      return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
-    },
-    submitAnswer: async (data: { questionId: number, answer: string }): Promise<API_RESPONSE[API_QUERY.SUBMIT_ANSWER]> => {
+    /**
+     * Submit an answer to a question
+     * @param data
+     * @param data.id The question's id
+     * @param data.answer The answer to the question
+     */
+    submitAnswer: async (data: { id: number, answer: string }): Promise<API_RESPONSE[API_QUERY.SUBMIT_ANSWER]> => {
       const requestTimestamp = Date.now()
 
       const response = await useFetch(`${API_BASE}/answers`, {

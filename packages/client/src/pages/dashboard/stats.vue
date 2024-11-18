@@ -5,12 +5,14 @@
 
 <script setup lang="ts">
 useHead({
-  title: `Profile • QueryQuest`,
+  title: `Stats • QueryQuest`,
 })
 
-const xp = ref(0)
-const wins = ref(0)
-const losses = ref(0)
+const state = useStateStore()
+
+onMounted(async () => {
+  state.refreshStats()
+})
 </script>
 
 <template>
@@ -19,15 +21,20 @@ const losses = ref(0)
       Statistics
     </span>
 
-    <div flex flex-col>
+    <div v-if="state.stats" div flex flex-col>
       <span px-2 py-1 op-75>
-        Total Wins: {{ wins }}
+        Total Wins: {{ state.stats.wins }}
       </span>
       <span px-2 py-1 op-75>
-        Total Losses: {{ losses }}
+        Total Losses: {{ state.stats.losses }}
       </span>
       <span px-2 py-1 op-75>
-        Experience Points: {{ xp }}
+        Experience Points: {{ state.stats.xp }}
+      </span>
+    </div>
+    <div v-else>
+      <span px-2 py-1 op-75>
+        Loading...
       </span>
     </div>
   </main>
