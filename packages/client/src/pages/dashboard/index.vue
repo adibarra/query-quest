@@ -14,7 +14,7 @@ const router = useRouter()
 const quest = useAPI()
 
 const allQuestions = ref<Question[]>([])
-const availableTags = ref<Tag[]>([
+const allTags = ref<Tag[]>([
   { id: 1, name: 'Geography', description: '' },
   { id: 2, name: 'Science', description: '' },
   { id: 3, name: 'History', description: '' },
@@ -26,8 +26,9 @@ const availableTags = ref<Tag[]>([
   { id: 9, name: 'Space', description: '' },
   { id: 10, name: 'General', description: '' },
 ])
+const tagOptions = computed(() => allTags.value.map(tag => ({ label: tag.name, value: tag.id })))
+
 const tagQuery = ref<number[]>([])
-const tagOptions = computed(() => availableTags.value.map(tag => ({ label: tag.name, value: tag.id })))
 const filteredQuestions = computed(() => {
   if (tagQuery.value.length === 0)
     return allQuestions.value
@@ -108,7 +109,7 @@ onMounted(async () => {
                     type="success"
                     size="small"
                   >
-                    {{ availableTags.find((tag: Tag) => tag.id === tagID)!.name }}
+                    {{ allTags.find((tag: Tag) => tag.id === tagID)!.name }}
                   </NTag>
                 </div>
               </div>
