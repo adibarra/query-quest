@@ -145,6 +145,64 @@ class UsersMixin:
             if conn:
                 self.connectionPool.putconn(conn)
 
+    def update_user(
+        self,
+        uuid: str,
+        username: Optional[str] = None,
+        password_hash: Optional[str] = None,
+    ) -> bool:
+        """
+        Updates a user in the database.
+
+        This method updates a user's details in the database based on the provided `uuid`.
+        It allows updating the user's `username` and/or `password_hash`. If at least one
+        field is updated successfully, it returns `True`. If an error occurs or no fields are updated,
+        it returns `False`.
+
+        Args:
+            uuid (str): The UUID of the user to be updated.
+            username (Optional[str]): The new username of the user. Default is `None`.
+            password_hash (Optional[str]): The new password hash of the user. Default is `None`.
+
+        Returns:
+            bool:
+                - `True` if the user was successfully updated.
+                - `False` if no changes were made or if an error occurs during the update process.
+
+        Raises:
+            Exception: For errors that may occur during the update (e.g., database connectivity issues).
+        """
+        conn = None
+        try:
+            conn = self.connectionPool.getconn()
+            with conn.cursor() as cursor:
+                set_clause = []
+                params = []
+
+                if username is not None:
+                    set_clause.append("username = %s")
+                    params.append(username)
+                if password_hash is not None:
+                    set_clause.append("password_hash = %s")
+                    params.append(password_hash)
+
+                if not set_clause:
+                    return False
+
+                query = f"UPDATE users SET {", ".join(set_clause)} WHERE uuid = %s"
+                params.append(uuid)
+
+                cursor.execute(query, params)
+                conn.commit()
+
+                return cursor.rowcount > 0
+        except Exception as e:
+            print("Failed to update user:", e, flush=True)
+            return False
+        finally:
+            if conn:
+                self.connectionPool.putconn(conn)
+
     def create_user(
         self,
         username: str,

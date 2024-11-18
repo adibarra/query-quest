@@ -114,11 +114,10 @@ def patch_user(
             detail="Bad Request: Username or password invalid",
         )
 
-    # TODO: db.update_user does not exist
     if not db.update_user(
         str(uuid),
-        data.username,
-        Auth.hash_password(data.password) if data.password else None,
+        username=data.username,
+        password_hash=Auth.hash_password(data.password) if data.password else None,
     ):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
