@@ -17,10 +17,10 @@ export const useStateStore = defineStore('state', () => {
     if (isAuthenticated.value) {
       const uuid = quest.getSession()!.user_uuid
       const response = await quest.getUser({ uuid })
-        if (response.code === API_STATUS.OK) {
-          user.value = response.data
-          return
-        }
+      if (response.code === API_STATUS.OK) {
+        user.value = response.data
+        return
+      }
     }
     user.value = null
     await quest.deauth()
