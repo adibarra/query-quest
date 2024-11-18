@@ -21,7 +21,7 @@ onMounted(async () => {
       Statistics
     </span>
 
-    <div v-if="state.stats" div flex flex-col>
+    <div v-if="state.stats" flex flex-col>
       <span px-2 py-1 op-75>
         Total Wins: {{ state.stats.wins }}
       </span>
