@@ -268,7 +268,7 @@ export function useAPI(options?: { base?: string }) {
     getQuestion: async (data: { id: number }): Promise<API_RESPONSE[API_QUERY.GET_QUESTION]> => {
       const requestTimestamp = Date.now()
 
-      const response = await useFetch(`${API_BASE}/question/${data.id}`, {
+      const response = await useFetch(`${API_BASE}/questions/${data.id}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${session.value?.token}`,
@@ -381,7 +381,7 @@ export function useAPI(options?: { base?: string }) {
     [API_QUERY.UPDATE_USER]: ExpandRecursively<DataAPIResponse<User> | BadAPIResponse>
     [API_QUERY.DELETE_USER]: ExpandRecursively<BaseAPIResponse | BadAPIResponse>
     [API_QUERY.POST_QUESTION]: ExpandRecursively<BaseAPIResponse | BadAPIResponse>
-    [API_QUERY.GET_QUESTION]: ExpandRecursively<DataAPIResponse<Question> | BadAPIResponse>
+    [API_QUERY.GET_QUESTION]: ExpandRecursively<DataAPIResponse<Question[]> | BadAPIResponse>
     [API_QUERY.GET_QUESTIONS]: ExpandRecursively<DataAPIResponse<Question[]> | BadAPIResponse>
     [API_QUERY.GET_TAGS]: ExpandRecursively<DataAPIResponse<Tag[]> | BadAPIResponse>
     [API_QUERY.GET_STATS]: ExpandRecursively<DataAPIResponse<Stats> | BadAPIResponse>

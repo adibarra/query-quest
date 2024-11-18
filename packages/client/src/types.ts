@@ -20,15 +20,18 @@ export interface User {
 }
 
 export interface Question {
-  id: string
+  id: number
   question: string
   difficulty: number
-  options: string[]
-  tags: string[]
+  option1: string
+  option2: string
+  option3?: string
+  option4?: string
+  tags: number[]
 }
 
 export interface Tag {
-  id: string
+  id: number
   name: string
   description: string
 }
