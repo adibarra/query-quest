@@ -13,6 +13,7 @@ useHead({
 const router = useRouter()
 const quest = useAPI()
 
+const loading = ref(true)
 const allQuestions = ref<Question[]>([])
 const allTags = ref<Tag[]>([
   { id: 1, name: 'Geography', description: '' },
@@ -52,6 +53,7 @@ onMounted(async () => {
   const response = await quest.getQuestions()
   if (response.code === API_STATUS.OK) {
     allQuestions.value = response.data
+    loading.value = false
   }
 })
 </script>
@@ -85,13 +87,17 @@ onMounted(async () => {
       </NButton>
     </div>
 
-    <div v-if="filteredQuestions.length">
-      <div mt-2 space-y-4>
+    <div mt-2 flex grow flex-col>
+      <div v-if="loading" flex grow justify-center>
+        <n-spin size="large" />
+      </div>
+
+      <div v-else-if="filteredQuestions.length">
         <NCard
           v-for="question in filteredQuestions"
           :key="question.id"
           :title="question.question"
-          rounded-md bg--c-secondary p-2 shadow-md
+          mb-4 rounded-md bg--c-secondary p-2 shadow-md
         >
           <div flex flex-row justify-between>
             <div flex flex-col gap-2>
@@ -126,12 +132,12 @@ onMounted(async () => {
           </div>
         </NCard>
       </div>
-    </div>
 
-    <div v-else-if="tagQuery" mt-4>
-      <p text-red font-600>
-        No questions found with all selected tags.
-      </p>
+      <div v-else-if="tagQuery">
+        <span text-red font-600>
+          No questions found with all selected tags.
+        </span>
+      </div>
     </div>
   </main>
 </template>
