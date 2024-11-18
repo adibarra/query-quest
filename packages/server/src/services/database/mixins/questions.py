@@ -26,7 +26,7 @@ class QuestionsMixin:
             id (int): The id of the question.
 
         Returns:
-            dict | None: A dictionary containing information about the question if successful, None otherwise.
+            QuestionWithTagsDict | None: A dictionary containing information about the question if successful, None otherwise.
         """
         conn = None
         try:
@@ -34,55 +34,44 @@ class QuestionsMixin:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    SELECT *
-                    FROM Questions
-                    WHERE id = %s
+                    SELECT q.id, q.question, q.difficulty, q.option1, q.option2, q.option3, q.option4, qt.tag_id
+                    FROM Questions q
+                    LEFT JOIN Question_Tags qt ON q.id = qt.question_id
+                    WHERE q.id = %s
                     """,
                     [id],
                 )
-                question_data = cursor.fetchone()
+                question_data = cursor.fetchall()
 
                 if not question_data:
-                    print(f"No question found with id: {id}", flush=True)
                     return None
 
-                column_names = [desc[0] for desc in cursor.description]
-                question = dict(zip(column_names, question_data))
+                question = {
+                    "id": question_data[0][0],
+                    "question": question_data[0][1],
+                    "difficulty": question_data[0][2],
+                    "options": [question_data[0][3], question_data[0][4], question_data[0][5], question_data[0][6]],
+                    "tags": []
+                }
 
-                question["options"] = [
-                    question.pop("option1"),
-                    question.pop("option2"),
-                    question.pop("option3"),
-                    question.pop("option4"),
-                ]
-                question["options"] = [
-                    opt for opt in question["options"] if opt is not None
-                ]
-
-                cursor.execute(
-                    """
-                    SELECT tag_id
-                    FROM Question_Tags
-                    WHERE question_id = %s
-                    """,
-                    [id],
-                )
-                tags = [row[0] for row in cursor.fetchall()]
-                question["tags"] = tags
+                for row in question_data:
+                    if row[7]:
+                        question["tags"].append(row[7])
 
                 return QuestionWithTagsDict(
                     id=question["id"],
                     question=question["question"],
                     difficulty=question["difficulty"],
-                    options=question["options"],
-                    tags=question["tags"],
+                    options=[opt for opt in question["options"] if opt],
+                    tags=question["tags"]
                 )
         except Exception as e:
-            print(f"Failed to retrieve question {id}: {e}", flush=True)
+            print("Failed to retrieve question:", e, flush=True)
             return None
         finally:
             if conn:
                 self.connectionPool.putconn(conn)
+
 
     def get_questions(self) -> list[QuestionWithTagsDict]:
         """
@@ -97,53 +86,43 @@ class QuestionsMixin:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    SELECT *
-                    FROM Questions
-                    """,
+                    SELECT q.id, q.question, q.difficulty, q.option1, q.option2, q.option3, q.option4, qt.tag_id
+                    FROM Questions q
+                    LEFT JOIN Question_Tags qt ON q.id = qt.question_id
+                    """
                 )
                 questions_data = cursor.fetchall()
 
                 if not questions_data:
-                    print("No questions found in the database.", flush=True)
                     return []
 
-                column_names = [desc[0] for desc in cursor.description]
-                questions = [dict(zip(column_names, row)) for row in questions_data]
+                questions = {}
+                for row in questions_data:
+                    question_id = row[0]
+                    if question_id not in questions:
+                        questions[question_id] = {
+                            "id": row[0],
+                            "question": row[1],
+                            "difficulty": row[2],
+                            "options": [row[3], row[4], row[5], row[6]],
+                            "tags": [],
+                        }
 
-                for question in questions:
-                    question["options"] = [
-                        question.pop("option1"),
-                        question.pop("option2"),
-                        question.pop("option3"),
-                        question.pop("option4"),
-                    ]
-                    question["options"] = [
-                        opt for opt in question["options"] if opt is not None
-                    ]
-
-                    cursor.execute(
-                        """
-                        SELECT tag_id
-                        FROM Question_Tags
-                        WHERE question_id = %s
-                        """,
-                        [question["id"]],
-                    )
-                    tags = [row[0] for row in cursor.fetchall()]
-                    question["tags"] = tags
+                    if row[7]:
+                        questions[question_id]["tags"].append(row[7])
 
                 return [
                     QuestionWithTagsDict(
                         id=question["id"],
                         question=question["question"],
                         difficulty=question["difficulty"],
-                        options=question["options"],
-                        tags=question["tags"],
+                        options=[opt for opt in question["options"] if opt],
+                        tags=question["tags"]
                     )
-                    for question in questions
+                    for question in questions.values()
                 ]
         except Exception as e:
-            print(f"Error fetching questions: {e}", flush=True)
+            print("Error fetching questions:", e, flush=True)
             return []
         finally:
             if conn:
