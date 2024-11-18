@@ -1,4 +1,4 @@
-# @author: adibarra (Alec Ibarra)
+# @author: adibarra (Alec Ibarra), chipterpill
 # @description: Database class for handling user database operations
 
 from typing import TYPE_CHECKING, Optional
