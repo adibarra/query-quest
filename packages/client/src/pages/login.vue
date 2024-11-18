@@ -2,106 +2,94 @@
   @author: adibarra (Alec Ibarra)
   @description: This component is used to display the login/register page of the application.
 -->
-<script setup lang="ts">
-const { t } = useI18n()
-const router = useRouter()
-const QueryQuest = useAPI()
-const state = useStateStore()
 
-const activeForm = useStorage<'login' | 'register'>('login-last-form', 'register')
-const rememberMe = useStorage('login-remember-me', false)
-const username = useStorage('login-username', '')
+<script setup lang="ts">
+const quest = useAPI()
+const router = useRouter()
+const state = useStateStore()
+const activeForm = useStorage<'login' | 'register'>('query-quest/login/last-form', 'register')
+const rememberMe = useStorage('query-quest/login/remember-me', false)
+const username = useStorage('query-quest/login/username', '')
 const password = ref('')
 const confirmPassword = ref('')
 const error = ref('')
-const waitForLogin = ref(false)
 
 useHead({
   title: `Login/Register • QueryQuest`,
 })
-// make sure uuid is set before redirecting
-watch(() => [QueryQuest.authenticated.value, waitForLogin.value], () => {
-  if (QueryQuest.authenticated.value && !waitForLogin.value)
-    router.push('/dashboard')
-}, { immediate: true })
 
 async function handleSubmit() {
-  if (activeForm.value === 'login')
-    await login()
-  else
-    await createAccount()
- }
+  if (activeForm.value === 'login') {
+    if (!username.value || !password.value) {
+      error.value = 'Please fill out all fields.'
+      return
+    }
 
- async function createAccount() {
-  if (!username.value || !password.value) {
-    error.value = t('pages.login.missing-credentials')
-    return
-  }
+    const response = await quest.auth({
+      username: username.value,
+      password: password.value,
+    })
 
-  if (password.value !== confirmPassword.value) {
-    error.value = t('pages.login.password-mismatch')
-    return
-  }
-
-  const createUser = await QueryQuest.createUser({username: username.value, password: password.value })
-  switch (createUser.code) {
-    case 400:
-      error.value = t('pages.login.invalid-registration')
-      break
-    case 200:
-      login()
-      break
-    default:
-      error.value = t('pages.login.unknown-error')
-      break
-  }
-}
-async function login() {
-  if (!username.value || !password.value) {
-    error.value = t('pages.login.missing-credentials')
-    return
-  }
-
-  waitForLogin.value = true
-  const loginResponse = await QueryQuest.auth({ username: username.value, password: password.value })
-
-  switch (loginResponse.code) {
-    case API_STATUS.BAD_REQUEST:
-      error.value = t('pages.login.no-account-found')
-      break
-    case API_STATUS.ERROR:
-      error.value = t('pages.login.invalid-credentials')
-      break
-    case API_STATUS.OK:
-      if (!rememberMe.value) username.value = ''
-
-      // Wrap the variable declaration inside braces to avoid lexical errors
-      {
-        const userResponse = await QueryQuest.getUser()
-        if (userResponse.code === API_STATUS.OK && userResponse.data) {
-          state.user.uuid = userResponse.data.uuid  // Set UUID from fetched user data
-          state.user.username = userResponse.data.username
-        } else {
-          error.value = t('pages.login.unknown-error')
-        }
+    if (response.code !== API_STATUS.CREATED) {
+      switch (response.code) {
+        case API_STATUS.NOT_FOUND:
+          error.value = 'User not found.'
+          break
+        case API_STATUS.FORBIDDEN:
+          error.value = 'Invalid password.'
+          break
+        default:
+          error.value = response.message
+          break
       }
-      break
-    default:
-      error.value = t('pages.login.unknown-error')
-      break
+    }
   }
-  waitForLogin.value = false
+  else {
+    if (!username.value || !password.value || !confirmPassword.value) {
+      error.value = 'Please fill out all fields.'
+      return
+    }
+
+    if (password.value !== confirmPassword.value) {
+      error.value = 'Passwords do not match.'
+      return
+    }
+
+    const userResponse = await quest.createUser({
+      username: username.value,
+      password: password.value,
+    })
+
+    if (userResponse.code !== API_STATUS.CREATED) {
+      switch (userResponse.code) {
+        case API_STATUS.CONFLICT:
+          error.value = 'Username already exists.'
+          break
+        default:
+          error.value = userResponse.message
+          break
+      }
+    }
+
+    await quest.auth({
+      username: username.value,
+      password: password.value,
+    })
+  }
 }
-
-
 
 function toggleForm() {
   activeForm.value = activeForm.value === 'login' ? 'register' : 'login'
 
-  // clear confirm password if switching forms
   if (activeForm.value === 'register')
     confirmPassword.value = ''
 }
+
+watch(() => state.isAuthenticated, (isAuthenticated) => {
+  if (!isAuthenticated)
+    return
+  router.push('/dashboard')
+}, { immediate: true })
 </script>
 
 <template>

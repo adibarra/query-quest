@@ -21,11 +21,6 @@ useHead({
           To Login Page
         </n-button>
       </RouterLink>
-      <RouterLink to="/dashboard">
-        <n-button>
-          To Dashboard
-        </n-button>
-      </RouterLink>
     </div>
   </main>
   <span

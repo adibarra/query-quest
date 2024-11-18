@@ -8,6 +8,12 @@ import type { Router } from 'vue-router'
 
 export type UserModule = (ctx: { app: App, router: Router }) => void
 
+export interface Session {
+  user_uuid: string
+  token: string
+  created_at: string
+}
+
 export interface User {
   uuid: string
   username: string

@@ -9,9 +9,10 @@ from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
 from config import API_CORS_ORIGINS, API_HOST, API_PORT
-from routes.api.health import router as health_router
-from routes.api.v1.sessions import router as sessions_router
-from routes.api.v1.users import router as users_router
+from routes.api.health import router as api_health_router
+from routes.api.v1.questions import router as api_v1_questions_router
+from routes.api.v1.sessions import router as api_v1_sessions_router
+from routes.api.v1.users import router as api_v1_users_router
 
 app = FastAPI()
 
@@ -24,36 +25,30 @@ app.add_middleware(
 )
 
 
-@app.exception_handler(404)
-async def not_found_exception_handler(request, exc):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"code": exc.status_code, "message": exc.detail},
-    )
-
-
 @app.exception_handler(ValidationError)
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
-    print("Validation error:", exc)
+async def validation_exception_handler(request, e: RequestValidationError):
+    print("Validation error:", e)
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content={"code": 400, "message": "Bad Request"},
+        content={"code": 400, "message": "Bad Request: Validation Error"},
     )
 
 
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request, exc):
+async def http_exception_handler(request, e: HTTPException):
+    print("HTTP error:", e)
     return JSONResponse(
-        status_code=exc.status_code,
-        content={"code": exc.status_code, "message": exc.detail},
+        status_code=e.status_code,
+        content={"code": e.status_code, "message": e.detail},
     )
 
 
 # TODO: add all routers here
-app.include_router(health_router)
-app.include_router(sessions_router)
-app.include_router(users_router)
+app.include_router(api_health_router)
+app.include_router(api_v1_sessions_router)
+app.include_router(api_v1_questions_router)
+app.include_router(api_v1_users_router)
 
 if __name__ == "__main__":
     uvicorn.run(

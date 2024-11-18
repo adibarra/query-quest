@@ -7,10 +7,10 @@
 const router = useRouter()
 const state = useStateStore()
 
-onBeforeMount(() => {
-  if (!state.isAuthenticated)
+watch(() => state.isAuthenticated, (isAuthenticated) => {
+  if (!isAuthenticated)
     router.replace('/login')
-})
+}, { immediate: true })
 </script>
 
 <template>

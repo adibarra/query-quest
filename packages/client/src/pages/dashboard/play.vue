@@ -157,11 +157,9 @@ const route = useRoute()
 const currentQuestionId = ref(Number(route.query.id) || 1)
 const currentQuestion = computed(() => allQuestions.value.find(q => q.id === currentQuestionId.value) || allQuestions.value[0])
 
-const isQuestionVisible = ref(true)
-const areOptionsVisible = ref(false)
-const isResultVisible = ref(false)
+const countdown = ref(3)
+const state = ref<'countdown' | 'options' | 'result'>('countdown')
 const userAnswer = ref<string | null>(null)
-
 const correctAnswer = computed(() => currentQuestion.value.options[0])
 const isCorrect = computed(() => userAnswer.value === correctAnswer.value)
 
@@ -174,27 +172,34 @@ const scrambledOptions = computed(() => {
   return options
 })
 
-function showOptions() {
-  isQuestionVisible.value = true
-  areOptionsVisible.value = false
-  userAnswer.value = null
-  isResultVisible.value = false
+function startCountdown() {
+  state.value = 'countdown'
+  countdown.value = 3
+  const countdownInterval = setInterval(() => {
+    if (countdown.value > 1) {
+      countdown.value -= 1
+    }
+    else {
+      clearInterval(countdownInterval)
+      showOptions()
+    }
+  }, 1000)
+}
 
-  setTimeout(() => {
-    areOptionsVisible.value = true
-  }, 2000)
+function showOptions() {
+  state.value = 'options'
+  userAnswer.value = null
 }
 
 function selectAnswer(answer: string) {
   userAnswer.value = answer
-  areOptionsVisible.value = false
-  isResultVisible.value = true
+  state.value = 'result'
 }
 
 function loadRandomQuestion() {
   const randomIndex = Math.floor(Math.random() * allQuestions.value.length)
   currentQuestionId.value = allQuestions.value[randomIndex].id
-  showOptions()
+  router.push({ query: { id: currentQuestionId.value.toString() } })
 }
 
 function goToDashboard() {
@@ -203,39 +208,53 @@ function goToDashboard() {
 
 watch(() => route.query.id, () => {
   currentQuestionId.value = Number(route.query.id) || 1
-  showOptions()
-})
-
-showOptions()
+  state.value = 'countdown'
+  startCountdown()
+}, { immediate: true })
 </script>
 
 <template>
   <main h-full w-full flex flex-col items-center>
     <div h-10svh />
-    <div v-if="isQuestionVisible" mb-4 text-2xl font-semibold>
-      {{ currentQuestion.question }}
+
+    <div v-if="state === 'countdown'" flex flex-col items-center>
+      <div mb-4 text-2xl font-semibold>
+        {{ currentQuestion.question }}
+      </div>
+      <div mb-4 text-2xl text--c-accent>
+        Get Ready!
+      </div>
+      <div mb-4 text-4xl font-bold>
+        {{ countdown }}
+      </div>
     </div>
 
-    <div v-show="areOptionsVisible" class="flex flex-col gap-2">
-      <NButton
-        v-for="option in scrambledOptions"
-        :key="option"
-        type="default"
-        size="large"
-        class="option-button"
-        @click="selectAnswer(option)"
-      >
-        {{ option }}
-      </NButton>
+    <div v-if="state === 'options'"  flex flex-col items-center>
+      <div mb-4 text-2xl font-semibold>
+        {{ currentQuestion.question }}
+      </div>
+        <div flex flex-wrap justify-center gap-2.5>
+        <NButton
+          v-for="option in scrambledOptions"
+          :key="option"
+          type="default"
+          size="large"
+          class="option-button"
+          style="width: calc(50% - 1rem);"
+          @click="selectAnswer(option)"
+        >
+          {{ option }}
+        </NButton>
+      </div>
     </div>
 
-    <div v-show="isResultVisible" class="mt-4 text-center">
+    <div v-show="state === 'result'" mt-4 text-center>
       <p :class="{ 'text-green-500': isCorrect, 'text-red-500': !isCorrect }" text-2xl font-bold>
         {{ isCorrect ? 'Correct! 🎉' : 'Oops, try again! ❌' }}
       </p>
 
       <div mt-2 text-xl text-blue-500>
-        +{{ isCorrect ? 10 : 0 }} XP
+        +{{ isCorrect ? 10 : 2 }} XP
       </div>
 
       <div mt-4 flex justify-center gap-4>
@@ -255,7 +274,7 @@ showOptions()
   transition: transform 0.2s ease;
 }
 .option-button:hover {
-  transform: scale(1.15);
+  transform: scale(1.05);
 }
 </style>
 

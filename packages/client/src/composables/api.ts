@@ -2,15 +2,20 @@
  * @author: adibarra (Alec Ibarra)
  * @description: Composable for providing access to the QueryQuest API
  */
-import type { UseFetchReturn } from '@vueuse/core'
-import type { Question, Stats, Tag, User } from '~/types'
+import type { AfterFetchContext, UseFetchReturn } from '@vueuse/core'
+import type { Question, Session, Stats, Tag, User } from '~/types'
 
 const token = useSessionStorage('query-quest/token', '')
 const authenticated = computed(() => Boolean (token.value))
 
 export enum API_STATUS {
   OK = 200,
+  CREATED = 201,
   BAD_REQUEST = 400,
+  UNAUTHORIZED = 401,
+  FORBIDDEN = 403,
+  NOT_FOUND = 404,
+  CONFLICT = 409,
   ERROR = 500,
   TIMEOUT = -1,
   OUTDATED = -2,
@@ -41,6 +46,7 @@ export function useAPI(options?: { base?: string }) {
     POST_SESSION, DELETE_SESSION,
     POST_USER, GET_USER, UPDATE_USER, DELETE_USER,
     POST_QUESTION, GET_QUESTION,
+    GET_QUESTIONS,
     GET_TAGS,
     GET_STATS,
     SUBMIT_ANSWER,
@@ -55,31 +61,42 @@ export function useAPI(options?: { base?: string }) {
     [API_QUERY.DELETE_USER]: 0,
     [API_QUERY.POST_QUESTION]: 0,
     [API_QUERY.GET_QUESTION]: 0,
+    [API_QUERY.GET_QUESTIONS]: 0,
     [API_QUERY.GET_TAGS]: 0,
     [API_QUERY.GET_STATS]: 0,
     [API_QUERY.SUBMIT_ANSWER]: 0,
   }
 
+  function setToken(ctx: AfterFetchContext) {
+    token.value = ctx.data.data.token
+    return ctx
+  }
+
+  function clearToken(ctx: AfterFetchContext) {
+    token.value = ''
+    return ctx
+  }
+
   return {
     /**
-     * Make sure user is authenticated
+     * Get the API token
      */
-    authenticated,
+    getToken: () => token.value,
     /**
      * Create a new session
      * @param data
      * @param data.username the user's username
      * @param data.password the user's password
-     * @returns a new API token if successful
+     * @returns a new session object if successful
      */
     auth: async (data: { username: string, password: string }): Promise<API_RESPONSE[API_QUERY.POST_SESSION]> => {
       const requestTimestamp = Date.now()
 
-      const response = await useFetch(`${API_BASE}/sessions?`, {
+      const response = await useFetch(`${API_BASE}/sessions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(removeEmpty(data)),
-      }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.POST_SESSION]>()
+      }, { afterFetch: setToken, timeout: 3333 }).json<API_RESPONSE[API_QUERY.POST_SESSION]>()
 
       if (requestTimestamp > latestCompletedTimestamps[API_QUERY.POST_SESSION]) {
         latestCompletedTimestamps[API_QUERY.POST_SESSION] = requestTimestamp
@@ -90,18 +107,19 @@ export function useAPI(options?: { base?: string }) {
     /**
      * Delete a session associated with a token
      */
-    deauth: async (): Promise<API_RESPONSE[API_QUERY.POST_SESSION]> => {
+    deauth: async (): Promise<API_RESPONSE[API_QUERY.DELETE_SESSION]> => {
       const requestTimestamp = Date.now()
 
-      const response = await useFetch(`${API_BASE}/sessions?`, {
+      const response = await useFetch(`${API_BASE}/sessions`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: token.value }),
-      }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.POST_SESSION]>()
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+        },
+      }, { afterFetch: clearToken, timeout: 3333 }).json<API_RESPONSE[API_QUERY.DELETE_SESSION]>()
 
-      if (requestTimestamp > latestCompletedTimestamps[API_QUERY.POST_SESSION]) {
-        latestCompletedTimestamps[API_QUERY.POST_SESSION] = requestTimestamp
-        return handleErrors<API_QUERY.POST_SESSION>(response)
+      if (requestTimestamp > latestCompletedTimestamps[API_QUERY.DELETE_SESSION]) {
+        latestCompletedTimestamps[API_QUERY.DELETE_SESSION] = requestTimestamp
+        return handleErrors<API_QUERY.DELETE_SESSION>(response)
       }
       return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
     },
@@ -110,7 +128,7 @@ export function useAPI(options?: { base?: string }) {
      * @param data
      * @param data.username The user's username
      * @param data.password The user's password
-     * @returns a new API token if successful
+     * @returns a new user object if successful
      */
     createUser: async (data: { username: string, password: string }): Promise<API_RESPONSE[API_QUERY.POST_USER]> => {
       const requestTimestamp = Date.now()
@@ -129,7 +147,7 @@ export function useAPI(options?: { base?: string }) {
     },
     /**
      * Get the user's information
-     * @returns a User object if successful
+     * @returns a user object if successful
      */
     getUser: async (): Promise<API_RESPONSE[API_QUERY.GET_USER]> => {
       const requestTimestamp = Date.now()
@@ -153,7 +171,7 @@ export function useAPI(options?: { base?: string }) {
      * @param data
      * @param data.username The user's new username
      * @param data.password The user's new password
-     * @returns a User object if successful
+     * @returns a new user object if successful
      */
     updateUser: async (data: { username?: string, password?: string }): Promise<API_RESPONSE[API_QUERY.UPDATE_USER]> => {
       const requestTimestamp = Date.now()
@@ -227,18 +245,37 @@ export function useAPI(options?: { base?: string }) {
     getQuestion: async (data: { id: number }): Promise<API_RESPONSE[API_QUERY.GET_QUESTION]> => {
       const requestTimestamp = Date.now()
 
+      const response = await useFetch(`${API_BASE}/question/${data.id}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token.value}`,
+          'Content-Type': 'application/json',
+        },
+      }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.GET_QUESTION]>()
+
+      if (requestTimestamp > latestCompletedTimestamps[API_QUERY.GET_QUESTION]) {
+        latestCompletedTimestamps[API_QUERY.GET_QUESTION] = requestTimestamp
+        return handleErrors<API_QUERY.GET_QUESTION>(response)
+      }
+      return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
+    },
+    /**
+     * Get all questions
+     */
+    getQuestions: async (): Promise<API_RESPONSE[API_QUERY.GET_QUESTIONS]> => {
+      const requestTimestamp = Date.now()
+
       const response = await useFetch(`${API_BASE}/questions`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token.value}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(removeEmpty(data)),
-      }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.GET_QUESTION]>()
+      }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.GET_QUESTIONS]>()
 
-      if (requestTimestamp > latestCompletedTimestamps[API_QUERY.GET_QUESTION]) {
-        latestCompletedTimestamps[API_QUERY.GET_QUESTION] = requestTimestamp
-        return handleErrors<API_QUERY.GET_QUESTION>(response)
+      if (requestTimestamp > latestCompletedTimestamps[API_QUERY.GET_QUESTIONS]) {
+        latestCompletedTimestamps[API_QUERY.GET_QUESTIONS] = requestTimestamp
+        return handleErrors<API_QUERY.GET_QUESTIONS>(response)
       }
       return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
     },
@@ -307,29 +344,30 @@ export function useAPI(options?: { base?: string }) {
   }
 
   interface BaseAPIResponse {
-    code: API_STATUS.ERROR | API_STATUS.BAD_REQUEST | API_STATUS.TIMEOUT | API_STATUS.OUTDATED | API_STATUS.OK
+    code: API_STATUS.ERROR | API_STATUS.BAD_REQUEST | API_STATUS.UNAUTHORIZED | API_STATUS.FORBIDDEN | API_STATUS.NOT_FOUND | API_STATUS.CONFLICT | API_STATUS.TIMEOUT | API_STATUS.OUTDATED | API_STATUS.OK | API_STATUS.CREATED
     message: string
   }
 
   interface BadAPIResponse extends BaseAPIResponse {
-    code: API_STATUS.ERROR | API_STATUS.BAD_REQUEST | API_STATUS.TIMEOUT | API_STATUS.OUTDATED
+    code: API_STATUS.ERROR | API_STATUS.BAD_REQUEST | API_STATUS.UNAUTHORIZED | API_STATUS.FORBIDDEN | API_STATUS.NOT_FOUND | API_STATUS.CONFLICT | API_STATUS.TIMEOUT | API_STATUS.OUTDATED
   }
 
   interface DataAPIResponse<T> extends BaseAPIResponse {
-    code: API_STATUS.OK
+    code: API_STATUS.OK | API_STATUS.CREATED
     message: string
     data: T
   }
 
   interface API_RESPONSE {
-    [API_QUERY.POST_SESSION]: ExpandRecursively<DataAPIResponse<string> | BadAPIResponse>
+    [API_QUERY.POST_SESSION]: ExpandRecursively<DataAPIResponse<Session> | BadAPIResponse>
     [API_QUERY.DELETE_SESSION]: ExpandRecursively<BaseAPIResponse | BadAPIResponse>
-    [API_QUERY.POST_USER]: ExpandRecursively<DataAPIResponse<string> | BadAPIResponse>
+    [API_QUERY.POST_USER]: ExpandRecursively<DataAPIResponse<User> | BadAPIResponse>
     [API_QUERY.GET_USER]: ExpandRecursively<DataAPIResponse<User> | BadAPIResponse>
     [API_QUERY.UPDATE_USER]: ExpandRecursively<DataAPIResponse<User> | BadAPIResponse>
     [API_QUERY.DELETE_USER]: ExpandRecursively<BaseAPIResponse | BadAPIResponse>
     [API_QUERY.POST_QUESTION]: ExpandRecursively<BaseAPIResponse | BadAPIResponse>
     [API_QUERY.GET_QUESTION]: ExpandRecursively<DataAPIResponse<Question> | BadAPIResponse>
+    [API_QUERY.GET_QUESTIONS]: ExpandRecursively<DataAPIResponse<Question[]> | BadAPIResponse>
     [API_QUERY.GET_TAGS]: ExpandRecursively<DataAPIResponse<Tag[]> | BadAPIResponse>
     [API_QUERY.GET_STATS]: ExpandRecursively<DataAPIResponse<Stats> | BadAPIResponse>
     [API_QUERY.SUBMIT_ANSWER]: ExpandRecursively<DataAPIResponse<boolean> | BadAPIResponse>
