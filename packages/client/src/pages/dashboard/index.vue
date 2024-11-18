@@ -14,16 +14,24 @@ const router = useRouter()
 const quest = useAPI()
 
 const allQuestions = ref<Question[]>([])
-const availableTags = ref<Tag[]>([])
-const tagQuery = ref<string[]>([])
+const availableTags = ref<Tag[]>([
+  { id: 1, name: 'Geography', description: '' },
+  { id: 2, name: 'Science', description: '' },
+  { id: 3, name: 'History', description: '' },
+  { id: 4, name: 'Literature', description: '' },
+  { id: 5, name: 'Mathematics', description: '' },
+  { id: 6, name: 'Art & Culture', description: '' },
+  { id: 7, name: 'Technology', description: '' },
+  { id: 8, name: 'Nature', description: '' },
+  { id: 9, name: 'Space', description: '' },
+  { id: 10, name: 'General', description: '' },
+])
+const tagQuery = ref<number[]>([])
+const tagOptions = computed(() => availableTags.value.map(tag => ({ label: tag.name, value: tag.id })))
 const filteredQuestions = computed(() => {
   if (tagQuery.value.length === 0)
     return allQuestions.value
-  const searchTags = tagQuery.value.map(tag => tag.toLowerCase())
-  return allQuestions.value.filter(question => {
-    const tags = question.tags.map(tagID => availableTags.value.find(tag => tag.id === tagID)?.name.toLowerCase())
-    return searchTags.every(tag => tags.includes(tag))
-  })
+  return allQuestions.value.filter(question => tagQuery.value.every(tag => question.tags.includes(tag)))
 })
 
 function goToPlayPage(questionId: number) {
@@ -56,13 +64,13 @@ onMounted(async () => {
     <div flex flex-row justify-between>
       <div max-w-md w-full flex flex-col gap-2>
         <label text--c-inverse font-medium>
-          Search by Tag:
+          Search by tags:
         </label>
         <NSelect
           placeholder="Select or type tags"
-          multiple clearable filterable
-          :options="availableTags"
-          @update:value="(value) => tagQuery = value"
+          clearable filterable multiple
+          :options="tagOptions"
+          @update:value="(value: number[]) => tagQuery = value"
         />
       </div>
 
@@ -95,12 +103,12 @@ onMounted(async () => {
                 <span>Tags:</span>
                 <div flex gap-1>
                   <NTag
-                    v-for="tag in question.tags"
-                    :key="tag"
+                    v-for="tagID in question.tags"
+                    :key="tagID"
                     type="success"
                     size="small"
                   >
-                    {{ tag }}
+                    {{ availableTags.find((tag: Tag) => tag.id === tagID)!.name }}
                   </NTag>
                 </div>
               </div>

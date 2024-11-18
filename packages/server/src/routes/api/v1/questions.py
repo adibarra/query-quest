@@ -1,7 +1,7 @@
 # @author: Adi-K527 (Adi Kandakurtikar)
 # @description: Questions routes for the API
 
-from typing import List, Optional
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
@@ -20,28 +20,21 @@ class QuestionData(BaseModel):
     id: int
     question: str
     difficulty: int
-    option1: str
-    option2: str
-    option3: Optional[str] = None
-    option4: Optional[str] = None
-
-    class Config:
-        exclude_none = True
+    options: List[str]
+    tags: List[int]
 
 
 class QuestionRequest(BaseModel):
     question: str
     difficulty: int
-    option1: str
-    option2: str
-    option3: Optional[str] = None
-    option4: Optional[str] = None
+    options: List[str]
+    tags: List[int]
 
 
 class QuestionResponse(BaseModel):
     code: int
     message: str
-    data: Optional[List[QuestionData]] = None
+    data: List[QuestionData] = None
 
     class Config:
         exclude_none = True
@@ -78,23 +71,36 @@ def get_question(
     return QuestionResponse(code=200, message="Ok", data=[question])
 
 
-@router.post(
-    "/questions",
-    response_model=QuestionResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-def create_question(
-    request: QuestionRequest,
-    session: SessionDict = Depends(requireAuth),
-):
-    new_question_data = db.create_question(request)
-    if not new_question_data:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create the question",
-        )
-
-    return QuestionResponse(code=201, message="Created", data=[new_question_data])
+# TODO: broken, needs to handle tags
+# @router.post(
+#     "/questions",
+#     response_model=QuestionResponse,
+#     status_code=status.HTTP_201_CREATED,
+# )
+# def create_question(
+#     request: QuestionRequest,
+#     session: SessionDict = Depends(requireAuth),
+# ):
+#     options = request.option_fields
+#
+#     new_question_id = db.create_question(
+#         question=request.question,
+#         difficulty=request.difficulty,
+#         **options
+#     )
+#
+#     if not new_question_id:
+#         raise HTTPException(
+#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             detail="Failed to create the question",
+#         )
+#
+#     if request.tags:
+#         db.add_tags_to_question(new_question_id, request.tags)
+#
+#     new_question_data = db.get_question(new_question_id)
+#
+#     return QuestionResponse(code=201, message="Created", data=[new_question_data])
 
 
 # @router.delete(

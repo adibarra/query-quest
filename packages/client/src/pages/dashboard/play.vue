@@ -18,12 +18,12 @@ const question = ref<Question | null>(null)
 const countdown = ref(3)
 const state = ref<'waiting' | 'countdown' | 'options' | 'result'>('waiting')
 const userAnswer = ref<string | null>(null)
-const isCorrect = computed(() => question.value && userAnswer.value === question.value.option1)
+const isCorrect = computed(() => question.value && userAnswer.value === question.value.options[0])
 
 const scrambledOptions = computed(() => {
   if (!question.value)
     return []
-  const options = [question.value.option1, question.value.option2, question.value.option3, question.value.option4].filter(i => i != null)
+  const options = [...question.value.options]
   for (let i = options.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[options[i], options[j]] = [options[j], options[i]]
