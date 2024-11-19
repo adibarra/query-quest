@@ -70,7 +70,7 @@ def get_tag(
 
 
 @router.post(
-    "/create-question-tag",
+    "/question-tags",
     response_model=QuestionTagResponse,
     status_code=status.HTTP_201_CREATED,
 )
