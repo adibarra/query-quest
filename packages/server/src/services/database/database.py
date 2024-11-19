@@ -9,6 +9,7 @@ from psycopg2 import pool
 
 # import all mixins here
 from services.database.mixins.meta import MetaMixin
+from services.database.mixins.question_tags import QuestionTagMixin
 from services.database.mixins.questions import QuestionsMixin
 from services.database.mixins.sessions import SessionsMixin
 from services.database.mixins.tags import TagsMixin
@@ -20,6 +21,7 @@ class Database(
     MetaMixin,
     SessionsMixin,
     QuestionsMixin,
+    QuestionTagMixin,
     UsersMixin,
     TagsMixin,
     object,
