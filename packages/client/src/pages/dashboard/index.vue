@@ -44,9 +44,8 @@ function goToPlayPage(questionId: number) {
 }
 
 function loadRandomQuestion() {
-  const randomIndex = Math.floor(Math.random() * allQuestions.value.length)
-  const randomQuestion = allQuestions.value[randomIndex]
-  goToPlayPage(randomQuestion.id)
+  const randomIndex = Math.floor(Math.random() * allQuestions.value.length) + 1
+  goToPlayPage(allQuestions.value[randomIndex].id)
 }
 
 onMounted(async () => {
