@@ -17,7 +17,7 @@ router = APIRouter(
 
 class QuestionTagData(BaseModel):
     question_id: int
-    tag_id: str
+    tag_id: int
 
     class Config:
         exclude_none = True
@@ -26,11 +26,6 @@ class QuestionTagData(BaseModel):
 class QuestionTagRequest(BaseModel):
     question_id: int
     tag_id: int
-
-
-class AssignTagsRequest(BaseModel):
-    question_id: int
-    tag_ids: List[int]
 
 
 class QuestionTagResponse(BaseModel):
@@ -75,15 +70,15 @@ def get_tag(
 
 
 @router.post(
-    "/assign-tags",
+    "/create-question-tag",
     response_model=QuestionTagResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def create_tag(
-    request: AssignTagsRequest,
+def create_question_tag(
+    request: QuestionTagRequest,
     session: SessionDict = Depends(requireAuth),
 ):
-    new_question_tag_data = db.assign_tags(request)
+    new_question_tag_data = db.create_question_tag(request)
     if not new_question_tag_data:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -96,7 +91,7 @@ def create_tag(
 
 
 @router.delete(
-    "/tags/{tag_id}/{question_id}",
+    "/question-tags/{question_id}/{tag_id}",
     response_model=QuestionTagResponse,
     status_code=status.HTTP_200_OK,
 )

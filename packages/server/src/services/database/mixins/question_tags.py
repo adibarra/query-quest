@@ -4,6 +4,7 @@
 from typing import TYPE_CHECKING
 
 import psycopg2
+from helpers.types import QuestionTagDict
 
 if TYPE_CHECKING:
     from psycopg2.pool import SimpleConnectionPool
@@ -48,7 +49,7 @@ class QuestionTagMixin:
             if conn:
                 self.connectionPool.putconn(conn)
 
-    def get_question_tag(self, tag_id: int, question_id: int) -> dict | None:
+    def get_question_tag(self, question_id: int, tag_id: int) -> dict | None:
         """
         Retrieves a single question tag association.
 
@@ -93,19 +94,20 @@ class QuestionTagMixin:
             if conn:
                 self.connectionPool.putconn(conn)
 
-    def assign_tags(self, question_id: int, tags: list[int]) -> list[dict] | None:
+    def create_question_tag(self, question_tag: QuestionTagDict) -> dict | None:
         """
         Assigns a set of tags to a specific question.
 
         Args:
-            question_id (int): The id of the question to assign the tags to.
-            tags (list[int]):  The list of ids of the tags to assign to the question.
+            question_tag (QuestionTagDict): The object containing the specific question and the tag to be assigned.
 
         Returns:
-            list[dict]: A list of dictionaries containing information about each new question tag if successful, None otherwise.
+            dict: A dictionary containing information about the new question tag if successful, None otherwise.
         """
         conn = None
         try:
+            question_id, tag_id = question_tag.question_id, question_tag.tag_id
+
             conn = self.connectionPool.getconn()
             with conn.cursor() as cursor:
                 cursor.execute(
@@ -115,6 +117,7 @@ class QuestionTagMixin:
                     """,
                 )
                 unique_questions = cursor.fetchall()
+                unique_questions = set(list([i[0] for i in unique_questions]))
 
                 cursor.execute(
                     """
@@ -123,39 +126,33 @@ class QuestionTagMixin:
                     """,
                 )
                 unique_tags = cursor.fetchall()
+                unique_tags = set(list([i[0] for i in unique_tags]))
 
                 if question_id not in unique_questions:
                     print(f"No question found with id: {question_id}", flush=True)
                     return None
 
-                for tag_id in tags:
-                    if tag_id not in unique_tags:
-                        print(f"No tag found with id: {tag_id}", flush=True)
-                        return None
-                    else:
-                        cursor.execute(
-                            """
-                            INSERT INTO Question_Tags (question_id, tag_id)
-                            VALUES (%s, %s)
-                            """,
-                        )
+                if tag_id not in unique_tags:
+                    print(f"No tag found with id: {tag_id}", flush=True)
+                    return None
 
                 cursor.execute(
                     """
-                    SELECT *
-                    FROM Question_Tags
-                    WHERE question_id = %s
+                    INSERT INTO Question_Tags (question_id, tag_id)
+                    VALUES (%s, %s)
+                    RETURNING *
                     """,
-                    [question_id],
+                    [question_id, tag_id],
                 )
-                new_question_tags = cursor.fetchall()
+                new_question_tag = cursor.fetchone()
+                conn.commit()
 
-                if not new_question_tags:
+                if not new_question_tag:
                     print("No question tags found in the database.", flush=True)
                     return []
 
                 column_names = [desc[0] for desc in cursor.description]
-                return [dict(zip(column_names, row)) for row in new_question_tags]
+                return dict(zip(column_names, new_question_tag))
         except psycopg2.IntegrityError as e:
             if "duplicate key value violates unique constraint" in str(e):
                 print(f"Duplicate question tag entry: {e}", flush=True)
