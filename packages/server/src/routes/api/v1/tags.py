@@ -29,11 +29,6 @@ class TagRequest(BaseModel):
     description: str
 
 
-class AssignTagsRequest(BaseModel):
-    question_id: int
-    tag_ids: List[int]
-
-
 class TagResponse(BaseModel):
     code: int
     message: str
@@ -92,25 +87,6 @@ def create_tag(
         )
 
     return TagResponse(code=201, message="Created", data=[new_tag_data])
-
-
-@router.post(
-    "/assign-tags",
-    response_model=TagResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-def assign_tags(
-    request: AssignTagsRequest,
-    session: SessionDict = Depends(requireAuth),
-):
-    new_tag_data = db.assign_tags(request)
-    if not new_tag_data:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create the tag",
-        )
-
-    return TagResponse(code=201, message="Tags assigned", data=[new_tag_data])
 
 
 @router.delete(

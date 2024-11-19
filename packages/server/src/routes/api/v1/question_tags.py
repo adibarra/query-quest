@@ -82,7 +82,7 @@ def create_question_tag(
     if not new_question_tag_data:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to assign tags to question",
+            detail="Failed to assign tag to question",
         )
 
     return QuestionTagResponse(
