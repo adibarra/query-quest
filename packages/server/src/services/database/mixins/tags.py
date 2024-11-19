@@ -132,68 +132,6 @@ class TagsMixin:
             if conn:
                 self.connectionPool.putconn(conn)
 
-    def assign_tags(self, question_id: int, tags: list[int]) -> bool:
-        """
-        Assigns a set of tags to a specific question.
-
-        Args:
-            question_id (int): The id of the question to assign the tags to.
-            tags (list[int]):  The list of ids of the tags to assign to the question.
-
-        Returns:
-            bool: A boolean set to True if the tags were assigned to the question, False otherwise.
-        """
-        conn = None
-        try:
-            conn = self.connectionPool.getconn()
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    """
-                    SELECT DISTINCT id
-                    FROM Questions
-                    """,
-                )
-                unique_questions = cursor.fetchall()
-
-                cursor.execute(
-                    """
-                    SELECT DISTINCT id
-                    FROM Tags
-                    """,
-                )
-                unique_tags = cursor.fetchall()
-
-                if question_id not in unique_questions:
-                    print(f"No question found with id: {question_id}", flush=True)
-                    return False
-
-                for tag_id in tags:
-                    if tag_id not in unique_tags:
-                        print(f"No tag found with id: {tag_id}", flush=True)
-                        return False
-                    else:
-                        cursor.execute(
-                            """
-                            INSERT INTO Question_Tags (question_id, tag_id)
-                            VALUES (%s, %s)
-                            """,
-                        )
-
-                return True
-        except psycopg2.IntegrityError as e:
-            if "duplicate key value violates unique constraint" in str(e):
-                print(f"Duplicate question entry: {e}", flush=True)
-                return None
-            else:
-                print(f"Integrity error when assigning tags: {e}", flush=True)
-                raise e
-        except Exception as e:
-            print(f"Failed to assign tags: {e}", flush=True)
-            return None
-        finally:
-            if conn:
-                self.connectionPool.putconn(conn)
-
     def delete_tag(self, tag_id: int) -> bool:
         """
         Deletes a tag from the database.
