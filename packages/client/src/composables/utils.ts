@@ -51,3 +51,16 @@ export function clamp(num: number, min: number, max: number): number {
 export function expandTemplate(str: string, map: Record<string, () => string>): string {
   return str.replaceAll(/\{(.*?)\}/g, (match, key) => (map[key] ? map[key]() : match))
 }
+
+/**
+ * Fisher-Yates shuffle algorithm to shuffle an array in place.
+ * @param array - The array to shuffle.
+ * @returns The shuffled array.
+ */
+export function shuffle<T>(array: T[]): T[] {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[array[i], array[j]] = [array[j], array[i]]
+  }
+  return array
+}
