@@ -14,6 +14,7 @@ const router = useRouter()
 const route = useRoute()
 const quest = useAPI()
 
+const randIDs = ref<number[]>([])
 const question = ref<Question | null>(null)
 const countdown = ref(3)
 const state = ref<'waiting' | 'countdown' | 'options' | 'result'>('waiting')
@@ -23,12 +24,7 @@ const isCorrect = computed(() => question.value && userAnswer.value === question
 const scrambledOptions = computed(() => {
   if (!question.value)
     return []
-  const options = [...question.value.options]
-  for (let i = options.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[options[i], options[j]] = [options[j], options[i]]
-  }
-  return options
+  return shuffle([...question.value.options])
 })
 
 function startCountdown() {
@@ -55,9 +51,16 @@ function selectAnswer(answer: string) {
   state.value = 'result'
 }
 
+function getNextID() {
+  const nextID = randIDs.value.pop()
+  if (nextID != null)
+    return nextID
+  randIDs.value = shuffle([...Array.from({ length: 59 }, (_, i) => i + 1)])
+  return randIDs.value.pop()!
+}
+
 function loadRandomQuestion() {
-  const randomIndex = Math.floor(Math.random() * 59) + 1
-  router.push({ query: { id: randomIndex.toString() } })
+  router.push({ query: { id: getNextID().toString() } })
 }
 
 function goToDashboard() {
@@ -86,7 +89,7 @@ watch(() => route.query.id, async () => {
       <div mb-4 text-2xl font-semibold>
         {{ question?.question }}
       </div>
-      <div mb-4 text-2xl text--c-accent>
+      <div mb-4 text-2xl text--c-accent font-bold>
         Get Ready!
       </div>
       <div v-show="state === 'countdown'" mb-4 text-4xl font-bold>
