@@ -3,10 +3,11 @@
 
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
+from pydantic import BaseModel
+
 from helpers.requireAuth import requireAuth
 from helpers.types import SessionDict
-from pydantic import BaseModel
 from services.database import Database
 
 db = Database()
@@ -19,9 +20,6 @@ class TagData(BaseModel):
     id: int
     name: str
     description: str
-
-    class Config:
-        exclude_none = True
 
 
 class TagRequest(BaseModel):
@@ -75,7 +73,7 @@ def get_tag(
     status_code=status.HTTP_201_CREATED,
 )
 def create_tag(
-    request: TagRequest,
+    request: TagRequest = Body(...),
     session: SessionDict = Depends(requireAuth),
 ):
     new_tag_data = db.create_tag(request)

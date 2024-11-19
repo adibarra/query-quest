@@ -3,10 +3,11 @@
 
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
+from pydantic import BaseModel
+
 from helpers.requireAuth import requireAuth
 from helpers.types import SessionDict
-from pydantic import BaseModel
 from services.database import Database
 
 db = Database()
@@ -18,9 +19,6 @@ router = APIRouter(
 class QuestionTagData(BaseModel):
     question_id: int
     tag_id: int
-
-    class Config:
-        exclude_none = True
 
 
 class QuestionTagRequest(BaseModel):
@@ -75,7 +73,7 @@ def get_tag(
     status_code=status.HTTP_201_CREATED,
 )
 def create_question_tag(
-    request: QuestionTagRequest,
+    request: QuestionTagRequest = Body(...),
     session: SessionDict = Depends(requireAuth),
 ):
     new_question_tag_data = db.create_question_tag(request)
