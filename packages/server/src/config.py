@@ -30,5 +30,5 @@ else:
 # server configuration
 API_HOST: str = os.environ.get("API_HOST")
 API_PORT: int = int(os.environ.get("API_PORT"))
-API_CORS_ORIGINS: List[str] = os.environ.get("API_CORS_ORIGINS").split(",")
+API_CORS_ORIGINS_REGEX: str = os.environ.get("API_CORS_ORIGINS_REGEX")
 SERVICE_POSTGRES_URI: str = os.environ.get("SERVICE_POSTGRES_URI")

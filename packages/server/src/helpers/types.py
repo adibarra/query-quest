@@ -5,6 +5,14 @@ from datetime import datetime
 from typing import Optional, TypedDict
 
 
+class QuestionWithTagsDict(TypedDict):
+    id: int
+    question: str
+    difficulty: int
+    options: list[str]
+    tags: list[int]
+
+
 class QuestionDict(TypedDict):
     id: int
     question: str

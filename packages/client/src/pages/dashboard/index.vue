@@ -13,17 +13,27 @@ useHead({
 const router = useRouter()
 const quest = useAPI()
 
+const loading = ref(true)
 const allQuestions = ref<Question[]>([])
-const availableTags = ref<Tag[]>([])
-const tagQuery = ref<string[]>([])
+const allTags = ref<Tag[]>([
+  { id: 1, name: 'Geography', description: '' },
+  { id: 2, name: 'Science', description: '' },
+  { id: 3, name: 'History', description: '' },
+  { id: 4, name: 'Literature', description: '' },
+  { id: 5, name: 'Mathematics', description: '' },
+  { id: 6, name: 'Art & Culture', description: '' },
+  { id: 7, name: 'Technology', description: '' },
+  { id: 8, name: 'Nature', description: '' },
+  { id: 9, name: 'Space', description: '' },
+  { id: 10, name: 'General', description: '' },
+])
+const tagOptions = computed(() => allTags.value.map(tag => ({ label: tag.name, value: tag.id })))
+
+const tagQuery = ref<number[]>([])
 const filteredQuestions = computed(() => {
   if (tagQuery.value.length === 0)
     return allQuestions.value
-  const searchTags = tagQuery.value.map(tag => tag.toLowerCase())
-  return allQuestions.value.filter(question => {
-    const tags = question.tags.map(tagID => availableTags.value.find(tag => tag.id === tagID)?.name.toLowerCase())
-    return searchTags.every(tag => tags.includes(tag))
-  })
+  return allQuestions.value.filter(question => tagQuery.value.every(tag => question.tags.includes(tag)))
 })
 
 function goToPlayPage(questionId: number) {
@@ -34,15 +44,15 @@ function goToPlayPage(questionId: number) {
 }
 
 function loadRandomQuestion() {
-  const randomIndex = Math.floor(Math.random() * allQuestions.value.length)
-  const randomQuestion = allQuestions.value[randomIndex]
-  goToPlayPage(randomQuestion.id)
+  const randomIndex = Math.floor(Math.random() * allQuestions.value.length) + 1
+  goToPlayPage(allQuestions.value[randomIndex].id)
 }
 
 onMounted(async () => {
   const response = await quest.getQuestions()
   if (response.code === API_STATUS.OK) {
     allQuestions.value = response.data
+    loading.value = false
   }
 })
 </script>
@@ -56,13 +66,13 @@ onMounted(async () => {
     <div flex flex-row justify-between>
       <div max-w-md w-full flex flex-col gap-2>
         <label text--c-inverse font-medium>
-          Search by Tag:
+          Search by tags:
         </label>
         <NSelect
           placeholder="Select or type tags"
-          multiple clearable filterable
-          :options="availableTags"
-          @update:value="(value) => tagQuery = value"
+          clearable filterable multiple
+          :options="tagOptions"
+          @update:value="(value: number[]) => tagQuery = value"
         />
       </div>
 
@@ -76,13 +86,17 @@ onMounted(async () => {
       </NButton>
     </div>
 
-    <div v-if="filteredQuestions.length">
-      <div mt-2 space-y-4>
+    <div mt-2 flex grow flex-col>
+      <div v-if="loading" flex grow justify-center>
+        <n-spin size="large" />
+      </div>
+
+      <div v-else-if="filteredQuestions.length">
         <NCard
           v-for="question in filteredQuestions"
           :key="question.id"
           :title="question.question"
-          rounded-md bg--c-secondary p-2 shadow-md
+          mb-4 rounded-md bg--c-secondary p-2 shadow-md
         >
           <div flex flex-row justify-between>
             <div flex flex-col gap-2>
@@ -95,12 +109,12 @@ onMounted(async () => {
                 <span>Tags:</span>
                 <div flex gap-1>
                   <NTag
-                    v-for="tag in question.tags"
-                    :key="tag"
+                    v-for="tagID in question.tags"
+                    :key="tagID"
                     type="success"
                     size="small"
                   >
-                    {{ tag }}
+                    {{ allTags.find((tag: Tag) => tag.id === tagID)!.name }}
                   </NTag>
                 </div>
               </div>
@@ -117,12 +131,12 @@ onMounted(async () => {
           </div>
         </NCard>
       </div>
-    </div>
 
-    <div v-else-if="tagQuery" mt-4>
-      <p text--c-inverse italic>
-        No questions found for tags: {{ tagQuery }}
-      </p>
+      <div v-else-if="tagQuery">
+        <span text-red font-600>
+          No questions found with all selected tags.
+        </span>
+      </div>
     </div>
   </main>
 </template>

@@ -14,20 +14,17 @@ const router = useRouter()
 const route = useRoute()
 const quest = useAPI()
 
+const randIDs = ref<number[]>([])
 const question = ref<Question | null>(null)
 const countdown = ref(3)
 const state = ref<'waiting' | 'countdown' | 'options' | 'result'>('waiting')
 const userAnswer = ref<string | null>(null)
-const isCorrect = computed(() => question.value && userAnswer.value === question.value.option1)
+const isCorrect = computed(() => question.value && userAnswer.value === question.value.options[0])
 
 const scrambledOptions = computed(() => {
-  if (!question.value) return []
-  const options = [question.value.option1, question.value.option2, question.value.option3, question.value.option4].filter(i => i != null)
-  for (let i = options.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[options[i], options[j]] = [options[j], options[i]]
-  }
-  return options
+  if (!question.value)
+    return []
+  return shuffle([...question.value.options])
 })
 
 function startCountdown() {
@@ -54,9 +51,16 @@ function selectAnswer(answer: string) {
   state.value = 'result'
 }
 
+function getNextID() {
+  const nextID = randIDs.value.pop()
+  if (nextID != null)
+    return nextID
+  randIDs.value = shuffle([...Array.from({ length: 59 }, (_, i) => i + 1)])
+  return randIDs.value.pop()!
+}
+
 function loadRandomQuestion() {
-  const randomIndex = Math.floor(Math.random() * 40)
-  router.push({ query: { id: randomIndex.toString() } })
+  router.push({ query: { id: getNextID().toString() } })
 }
 
 function goToDashboard() {
@@ -65,7 +69,8 @@ function goToDashboard() {
 
 watch(() => route.query.id, async () => {
   state.value = 'waiting'
-  const id = Number(route.query.id) || 0
+  question.value = null
+  const id = Number(route.query.id) ?? 1
   const response = await quest.getQuestion({ id })
   if (response.code === API_STATUS.OK) {
     question.value = response.data[0]
@@ -84,7 +89,7 @@ watch(() => route.query.id, async () => {
       <div mb-4 text-2xl font-semibold>
         {{ question?.question }}
       </div>
-      <div mb-4 text-2xl text--c-accent>
+      <div mb-4 text-2xl text--c-accent font-bold>
         Get Ready!
       </div>
       <div v-show="state === 'countdown'" mb-4 text-4xl font-bold>

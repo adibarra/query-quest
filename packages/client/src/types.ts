@@ -23,10 +23,7 @@ export interface Question {
   id: number
   question: string
   difficulty: number
-  option1: string
-  option2: string
-  option3?: string
-  option4?: string
+  options: string[]
   tags: number[]
 }
 

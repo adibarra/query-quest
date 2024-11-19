@@ -1,11 +1,11 @@
-# @author: Adi-K527 (Adi Kandakurtikar)
+# @author: adibarra (Alec Ibarra), Adi-K527 (Adi Kandakurtikar)
 # @description: Database class for handling question database operations
 
 from typing import TYPE_CHECKING
 
 import psycopg2
 
-from helpers.types import QuestionDict
+from helpers.types import QuestionWithTagsDict
 
 if TYPE_CHECKING:
     from psycopg2.pool import SimpleConnectionPool
@@ -18,15 +18,15 @@ class QuestionsMixin:
 
     connectionPool: "SimpleConnectionPool"
 
-    def get_question(self, question_id: int) -> dict | None:
+    def get_question(self, id: int) -> QuestionWithTagsDict | None:
         """
-        Retrieves a single question.
+        Retrieves a single question with its associated tags.
 
         Args:
-            question_id (int): The id of the question.
+            id (int): The id of the question.
 
         Returns:
-            dict | None: A dictionary containing information about the question if successful, None otherwise.
+            QuestionWithTagsDict | None: A dictionary containing information about the question if successful, None otherwise.
         """
         conn = None
         try:
@@ -34,30 +34,48 @@ class QuestionsMixin:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    SELECT *
-                    FROM Questions
-                    WHERE id = %s
+                    SELECT q.id, q.question, q.difficulty, q.option1, q.option2, q.option3, q.option4, qt.tag_id
+                    FROM Questions q
+                    LEFT JOIN Question_Tags qt ON q.id = qt.question_id
+                    WHERE q.id = %s
                     """,
-                    [question_id],
+                    [id],
                 )
-                question_data = cursor.fetchone()
+                question_data = cursor.fetchall()
 
                 if not question_data:
-                    print(f"No question found with id: {question_id}", flush=True)
                     return None
 
-                column_names = [desc[0] for desc in cursor.description]
-                return dict(zip(column_names, question_data))
+                question = {
+                    "id": question_data[0][0],
+                    "question": question_data[0][1],
+                    "difficulty": question_data[0][2],
+                    "options": [question_data[0][3], question_data[0][4], question_data[0][5], question_data[0][6]],
+                    "tags": []
+                }
+
+                for row in question_data:
+                    if row[7]:
+                        question["tags"].append(row[7])
+
+                return QuestionWithTagsDict(
+                    id=question["id"],
+                    question=question["question"],
+                    difficulty=question["difficulty"],
+                    options=[opt for opt in question["options"] if opt],
+                    tags=question["tags"]
+                )
         except Exception as e:
-            print(f"Failed to retrieve question {question_id}: {e}", flush=True)
+            print("Failed to retrieve question:", e, flush=True)
             return None
         finally:
             if conn:
                 self.connectionPool.putconn(conn)
 
-    def get_questions(self) -> list[dict]:
+
+    def get_questions(self) -> list[QuestionWithTagsDict]:
         """
-        Retrieves all questions.
+        Retrieves all questions with their associated tags.
 
         Returns:
             list[dict]: A list of dictionaries containing information about each question if successful, an empty list otherwise.
@@ -68,26 +86,52 @@ class QuestionsMixin:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    SELECT *
-                    FROM Questions
-                    """,
+                    SELECT q.id, q.question, q.difficulty, q.option1, q.option2, q.option3, q.option4, qt.tag_id
+                    FROM Questions q
+                    LEFT JOIN Question_Tags qt ON q.id = qt.question_id
+                    """
                 )
                 questions_data = cursor.fetchall()
 
                 if not questions_data:
-                    print("No questions found in the database.", flush=True)
                     return []
 
-                column_names = [desc[0] for desc in cursor.description]
-                return [dict(zip(column_names, row)) for row in questions_data]
+                questions = {}
+                for row in questions_data:
+                    question_id = row[0]
+                    if question_id not in questions:
+                        questions[question_id] = {
+                            "id": row[0],
+                            "question": row[1],
+                            "difficulty": row[2],
+                            "options": [row[3], row[4], row[5], row[6]],
+                            "tags": [],
+                        }
+
+                    if row[7]:
+                        questions[question_id]["tags"].append(row[7])
+
+                return [
+                    QuestionWithTagsDict(
+                        id=question["id"],
+                        question=question["question"],
+                        difficulty=question["difficulty"],
+                        options=[opt for opt in question["options"] if opt],
+                        tags=question["tags"]
+                    )
+                    for question in questions.values()
+                ]
         except Exception as e:
-            print(f"Error fetching questions: {e}", flush=True)
+            print("Error fetching questions:", e, flush=True)
             return []
         finally:
             if conn:
                 self.connectionPool.putconn(conn)
 
-    def create_question(self, question: QuestionDict) -> dict | None:
+    # TODO: broken, needs to handle tags
+    def create_question(
+        self, question: QuestionWithTagsDict
+    ) -> QuestionWithTagsDict | None:
         """
         Creates a new question in the database.
 
@@ -141,6 +185,7 @@ class QuestionsMixin:
             if conn:
                 self.connectionPool.putconn(conn)
 
+    # TODO: broken, needs to handle tags
     def delete_question(self, question_id: int) -> bool:
         """
         Deletes a question from the database.

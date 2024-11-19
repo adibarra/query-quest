@@ -4,23 +4,29 @@
 -->
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import type { Tag } from '~/types'
 
 const router = useRouter()
+const quest = useAPI()
+
 const question = ref('')
 const answers = ref(['', ''])
 const difficulty = ref(1)
-const tags = ref<string[]>([])
-const availableTags = ref([
-  { label: 'General', value: 'general' },
-  { label: 'Science', value: 'science' },
-  { label: 'Technology', value: 'technology' },
-  { label: 'History', value: 'history' },
-  { label: 'Geography', value: 'geography' },
-  { label: 'Entertainment', value: 'entertainment' },
-  { label: 'Sports', value: 'sports' },
+const tags = ref<number[]>([])
+
+const allTags = ref<Tag[]>([
+  { id: 1, name: 'Geography', description: '' },
+  { id: 2, name: 'Science', description: '' },
+  { id: 3, name: 'History', description: '' },
+  { id: 4, name: 'Literature', description: '' },
+  { id: 5, name: 'Mathematics', description: '' },
+  { id: 6, name: 'Art & Culture', description: '' },
+  { id: 7, name: 'Technology', description: '' },
+  { id: 8, name: 'Nature', description: '' },
+  { id: 9, name: 'Space', description: '' },
+  { id: 10, name: 'General', description: '' },
 ])
+const tagOptions = computed(() => allTags.value.map(tag => ({ label: tag.name, value: tag.id })))
 
 useHead({
   title: `Create • QueryQuest`,
@@ -29,7 +35,7 @@ useHead({
 function handleSubmit() { }
 
 function handleCancel() {
-  router.push('/')
+  router.push('/dashboard')
 }
 
 function addAnswer() {
@@ -128,7 +134,7 @@ function removeAnswer(index: number) {
       </div>
       <n-select
         v-model:value="tags"
-        :options="availableTags"
+        :options="tagOptions"
         placeholder="Select tags"
         multiple
       />
