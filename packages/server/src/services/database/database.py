@@ -4,8 +4,9 @@
 import os
 
 import psycopg2
-from config import SERVICE_POSTGRES_URI
 from psycopg2 import pool
+
+from config import SERVICE_POSTGRES_URI
 
 # import all mixins here
 from services.database.mixins.meta import MetaMixin
@@ -19,11 +20,11 @@ from services.database.mixins.users import UsersMixin
 # add all imported mixins here
 class Database(
     MetaMixin,
-    SessionsMixin,
     QuestionsMixin,
     QuestionTagMixin,
-    UsersMixin,
+    SessionsMixin,
     TagsMixin,
+    UsersMixin,
     object,
 ):
     """

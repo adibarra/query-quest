@@ -4,6 +4,7 @@
 from typing import TYPE_CHECKING
 
 import psycopg2
+
 from helpers.types import QuestionTagDict
 
 if TYPE_CHECKING:
