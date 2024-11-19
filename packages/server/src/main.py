@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
-from config import API_CORS_ORIGINS, API_HOST, API_PORT
+from config import API_CORS_ORIGINS_REGEX, API_HOST, API_PORT
 from routes.api.health import router as api_health_router
 from routes.api.v1.questions import router as api_v1_questions_router
 from routes.api.v1.sessions import router as api_v1_sessions_router
@@ -18,7 +18,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=API_CORS_ORIGINS,
+    allow_origin_regex=API_CORS_ORIGINS_REGEX,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
