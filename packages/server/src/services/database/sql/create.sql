@@ -2,7 +2,7 @@
 
 -- Table that holds all trivia questions and relevant metadata
 CREATE TABLE IF NOT EXISTS Questions(
-  id SERIAL NOT NULL,
+  id INTEGER GENERATED ALWAYS AS IDENTITY,
   question VARCHAR(500) NOT NULL,
   difficulty SMALLINT NOT NULL,
   option1 VARCHAR(50) NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS Statistics (
 
 -- Table that holds information about trivia questions tags
 CREATE TABLE IF NOT EXISTS Tags(
-  id SERIAL NOT NULL,
+  id INTEGER GENERATED ALWAYS AS IDENTITY,
   name VARCHAR(16) UNIQUE NOT NULL,
   description VARCHAR(255) NOT NULL,
   PRIMARY KEY (id)
@@ -53,8 +53,8 @@ CREATE TABLE IF NOT EXISTS Tags(
 
 -- Junction table used to associate tags with questions
 CREATE TABLE IF NOT EXISTS Question_Tags (
-  question_id BIGINT NOT NULL,
-  tag_id BIGINT NOT NULL,
+  question_id INTEGER NOT NULL,
+  tag_id INTEGER NOT NULL,
   PRIMARY KEY (question_id, tag_id),
   FOREIGN KEY (question_id)
     REFERENCES Questions(id)
