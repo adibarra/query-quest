@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
 from helpers.requireAuth import requireAuth
-from helpers.types import SessionDict
+from helpers.types import QuestionWithTagsDict, SessionDict
 from services.database import Database
 
 db = Database()
@@ -71,36 +71,30 @@ def get_question(
     return QuestionResponse(code=200, message="Ok", data=[question])
 
 
-# TODO: broken, needs to handle tags
-# @router.post(
-#     "/questions",
-#     response_model=QuestionResponse,
-#     status_code=status.HTTP_201_CREATED,
-# )
-# def create_question(
-#     request: QuestionRequest,
-#     session: SessionDict = Depends(requireAuth),
-# ):
-#     options = request.option_fields
-#
-#     new_question_id = db.create_question(
-#         question=request.question,
-#         difficulty=request.difficulty,
-#         **options
-#     )
-#
-#     if not new_question_id:
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail="Failed to create the question",
-#         )
-#
-#     if request.tags:
-#         db.add_tags_to_question(new_question_id, request.tags)
-#
-#     new_question_data = db.get_question(new_question_id)
-#
-#     return QuestionResponse(code=201, message="Created", data=[new_question_data])
+@router.post(
+    "/questions",
+    response_model=QuestionResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_question(
+    request: QuestionRequest,
+    session: SessionDict = Depends(requireAuth),
+):
+    new_question = db.create_question(
+        QuestionWithTagsDict(
+            question=request.question,
+            difficulty=request.difficulty,
+            options=request.options,
+            tags=request.tags,
+        )
+    )
+    if not new_question:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create the question",
+        )
+
+    return QuestionResponse(code=201, message="Created", data=[new_question])
 
 
 # @router.delete(

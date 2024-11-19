@@ -50,8 +50,13 @@ class QuestionsMixin:
                     "id": question_data[0][0],
                     "question": question_data[0][1],
                     "difficulty": question_data[0][2],
-                    "options": [question_data[0][3], question_data[0][4], question_data[0][5], question_data[0][6]],
-                    "tags": []
+                    "options": [
+                        question_data[0][3],
+                        question_data[0][4],
+                        question_data[0][5],
+                        question_data[0][6],
+                    ],
+                    "tags": [],
                 }
 
                 for row in question_data:
@@ -63,7 +68,7 @@ class QuestionsMixin:
                     question=question["question"],
                     difficulty=question["difficulty"],
                     options=[opt for opt in question["options"] if opt],
-                    tags=question["tags"]
+                    tags=question["tags"],
                 )
         except Exception as e:
             print("Failed to retrieve question:", e, flush=True)
@@ -71,7 +76,6 @@ class QuestionsMixin:
         finally:
             if conn:
                 self.connectionPool.putconn(conn)
-
 
     def get_questions(self) -> list[QuestionWithTagsDict]:
         """
@@ -117,7 +121,7 @@ class QuestionsMixin:
                         question=question["question"],
                         difficulty=question["difficulty"],
                         options=[opt for opt in question["options"] if opt],
-                        tags=question["tags"]
+                        tags=question["tags"],
                     )
                     for question in questions.values()
                 ]
@@ -128,18 +132,17 @@ class QuestionsMixin:
             if conn:
                 self.connectionPool.putconn(conn)
 
-    # TODO: broken, needs to handle tags
     def create_question(
         self, question: QuestionWithTagsDict
     ) -> QuestionWithTagsDict | None:
         """
-        Creates a new question in the database.
+        Creates a new question in the database, including its associated tags.
 
         Args:
-            question (Question): The object containing the attributes of the question.
+            question (QuestionWithTagsDict): The object containing the attributes of the question.
 
         Returns:
-            dict | None: A dictionary containing information about the newly created question if successful, None otherwise.
+            QuestionWithTagsDict | None: A dictionary containing information about the newly created question if successful, None otherwise.
         """
         conn = None
         try:
@@ -149,28 +152,48 @@ class QuestionsMixin:
                     """
                     INSERT INTO Questions (question, difficulty, option1, option2, option3, option4)
                     VALUES (%s, %s, %s, %s, %s, %s)
-                    RETURNING *
+                    RETURNING id, question, difficulty, option1, option2, option3, option4
                     """,
                     [
-                        question.question,
-                        question.difficulty,
-                        question.option1,
-                        question.option2,
-                        question.option3 or None,
-                        question.option4 or None,
+                        question["question"],
+                        question["difficulty"],
+                        question["options"][0]
+                        if len(question["options"]) > 0
+                        else None,
+                        question["options"][1]
+                        if len(question["options"]) > 1
+                        else None,
+                        question["options"][2]
+                        if len(question["options"]) > 2
+                        else None,
+                        question["options"][3]
+                        if len(question["options"]) > 3
+                        else None,
                     ],
                 )
-                question_data = cursor.fetchone()
-                conn.commit()
 
+                question_data = cursor.fetchone()
                 if not question_data:
-                    print(
-                        "Failed to retrieve question data after insertion.", flush=True
-                    )
                     return None
 
-                column_names = [desc[0] for desc in cursor.description]
-                return dict(zip(column_names, question_data))
+                question_id = question_data[0]
+                if "tags" in question and question["tags"]:
+                    cursor.executemany(
+                        """
+                        INSERT INTO Question_Tags (question_id, tag_id)
+                        VALUES (%s, %s)
+                        """,
+                        [(question_id, tag) for tag in question["tags"]],
+                    )
+                conn.commit()
+
+                return QuestionWithTagsDict(
+                    id=question_id,
+                    question=question_data[1],
+                    difficulty=question_data[2],
+                    options=[opt for opt in question_data[3:7] if opt],
+                    tags=question["tags"] if "tags" in question else [],
+                )
         except psycopg2.IntegrityError as e:
             if "duplicate key value violates unique constraint" in str(e):
                 print(f"Duplicate question entry: {e}", flush=True)
@@ -179,7 +202,7 @@ class QuestionsMixin:
                 print(f"Integrity error when creating question: {e}", flush=True)
                 raise e
         except Exception as e:
-            print(f"Failed to create question: {e}", flush=True)
+            print("Failed to create question:", e, flush=True)
             return None
         finally:
             if conn:

@@ -4,13 +4,15 @@
 -->
 
 <script setup lang="ts">
+import { useMessage } from 'naive-ui'
 import type { Tag } from '~/types'
 
+const message = useMessage()
 const router = useRouter()
 const quest = useAPI()
 
 const question = ref('')
-const answers = ref(['', ''])
+const options = ref(['', ''])
 const difficulty = ref(1)
 const tags = ref<number[]>([])
 
@@ -32,21 +34,58 @@ useHead({
   title: `Create • QueryQuest`,
 })
 
-function handleSubmit() { }
+async function handleSubmit() {
+  if (question.value === '') {
+    message.error('You must provide a question')
+    return
+  }
+
+  if (options.value.length < 2) {
+    message.error('You must provide at least 2 options')
+    return
+  }
+
+  if (options.value[0] === '' || options.value[1] === '') {
+    message.error('All options must be filled out')
+    return
+  }
+
+  const response = await quest.createQuestion({
+    question: question.value,
+    difficulty: difficulty.value,
+    options: options.value,
+    tags: tags.value,
+  })
+
+  if (response.code === API_STATUS.CREATED) {
+    message.success('Question created successfully!')
+    clearForm()
+  }
+  else {
+    message.error('Failed to create question')
+  }
+}
 
 function handleCancel() {
   router.push('/dashboard')
 }
 
-function addAnswer() {
-  if (answers.value.length < 4) {
-    answers.value.push('')
+function clearForm() {
+  question.value = ''
+  options.value = ['', '']
+  difficulty.value = 1
+  tags.value = []
+}
+
+function addOptions() {
+  if (options.value.length < 4) {
+    options.value.push('')
   }
 }
 
-function removeAnswer(index: number) {
-  if (answers.value.length > 2) {
-    answers.value.splice(index, 1)
+function removeOption(index: number) {
+  if (options.value.length > 2) {
+    options.value.splice(index, 1)
   }
 }
 </script>
@@ -85,22 +124,22 @@ function removeAnswer(index: number) {
         </span>
       </div>
       <div w-full flex flex-col>
-        <div v-for="(_, index) in answers" :key="index" class="mb-2 w-full flex flex-row items-center gap-2">
+        <div v-for="(_, index) in options" :key="index" class="mb-2 w-full flex flex-row items-center gap-2">
           <n-input
-            v-model:value="answers[index]"
+            v-model:value="options[index]"
             :placeholder="`Option ${index + 1}`"
             maxlength="50"
             show-count
           />
           <n-button
-            v-if="answers.length > 2"
-            @click="removeAnswer(index)"
+            v-if="options.length > 2"
+            @click="removeOption(index)"
           >
             -
           </n-button>
           <n-button
-            v-if="answers.length < 4 && index === answers.length - 1"
-            @click="addAnswer"
+            v-if="options.length < 4 && index === options.length - 1"
+            @click="addOptions"
           >
             +
           </n-button>
