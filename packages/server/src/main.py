@@ -2,16 +2,16 @@
 # @description: The main entry point for the server.
 
 import uvicorn
+from config import API_CORS_ORIGINS, API_HOST, API_PORT
 from fastapi import FastAPI, HTTPException, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
-
-from config import API_CORS_ORIGINS, API_HOST, API_PORT
 from routes.api.health import router as api_health_router
 from routes.api.v1.questions import router as api_v1_questions_router
 from routes.api.v1.sessions import router as api_v1_sessions_router
+from routes.api.v1.tags import router as api_v1_tags_router
 from routes.api.v1.users import router as api_v1_users_router
 
 app = FastAPI()
@@ -49,6 +49,7 @@ app.include_router(api_health_router)
 app.include_router(api_v1_sessions_router)
 app.include_router(api_v1_questions_router)
 app.include_router(api_v1_users_router)
+app.include_router(api_v1_tags_router)
 
 if __name__ == "__main__":
     uvicorn.run(

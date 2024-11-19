@@ -76,7 +76,7 @@ def get_tag(
 
 @router.post(
     "/tags",
-    response_model=TagRequest,
+    response_model=TagResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def create_tag(
@@ -84,6 +84,7 @@ def create_tag(
     session: SessionDict = Depends(requireAuth),
 ):
     new_tag_data = db.create_tag(request)
+    print(new_tag_data)
     if not new_tag_data:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -95,7 +96,7 @@ def create_tag(
 
 @router.post(
     "/assign-tags",
-    response_model=AssignTagsRequest,
+    response_model=TagResponse,
     status_code=status.HTTP_201_CREATED,
 )
 def assign_tags(

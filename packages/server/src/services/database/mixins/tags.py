@@ -103,15 +103,11 @@ class TagsMixin:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO Tags (id, name, description)
-                    VALUES (%s, %s, %s)
+                    INSERT INTO Tags (name, description)
+                    VALUES (%s, %s)
                     RETURNING *
                     """,
-                    [
-                        tag.id,
-                        tag.name,
-                        tag.description,
-                    ],
+                    [tag.name, tag.description],
                 )
                 tag_data = cursor.fetchone()
                 conn.commit()
