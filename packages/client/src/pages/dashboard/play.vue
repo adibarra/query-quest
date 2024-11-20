@@ -90,7 +90,7 @@ watch(() => route.query.id, async () => {
     <div h-10svh />
 
     <div v-if="['waiting', 'countdown'].includes(state)" flex flex-col items-center>
-      <div mb-4 text-2xl font-semibold>
+      <div mb-4 text-center text-2xl font-semibold>
         {{ question?.question }}
       </div>
       <div mb-4 text-2xl text--c-accent font-bold>
@@ -102,7 +102,7 @@ watch(() => route.query.id, async () => {
     </div>
 
     <div v-if="state === 'options'" flex flex-col items-center>
-      <div mb-4 text-2xl font-semibold>
+      <div mb-4 text-center text-2xl font-semibold>
         {{ question?.question }}
       </div>
       <div v-if="scrambledOptions" flex flex-wrap justify-center gap-2.5>
