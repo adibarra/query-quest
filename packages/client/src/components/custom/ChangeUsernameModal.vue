@@ -7,14 +7,36 @@
 import { useMessage } from 'naive-ui'
 
 const isOpen = defineModel<boolean>()
+
+const quest = useAPI()
+const state = useStateStore()
 const message = useMessage()
 
 const username = ref('')
 const error = ref('')
 
 async function changeUsername(slotCloseFunc: any) {
-  message.success('Username changed successfully')
-  close(slotCloseFunc)
+  if (username.value.length < 3) {
+    error.value = 'Username must be at least 3 characters long.'
+    return
+  }
+
+  const response = await quest.updateUser({ username: username.value })
+  if (response.code === API_STATUS.OK) {
+    state.refreshUser()
+    message.success('Username changed successfully')
+    close(slotCloseFunc)
+    return
+  }
+
+  message.error('Failed to change username')
+  switch (response.code) {
+    case API_STATUS.BAD_REQUEST:
+      error.value = 'Your username is invalid.'
+      break
+    default:
+      error.value = 'An error occurred. Try again later.'
+  }
 }
 
 function close(slotCloseFunc: any) {
@@ -41,7 +63,7 @@ function close(slotCloseFunc: any) {
               <n-input
                 v-model:value="username"
                 placeholder="New Username"
-                :status="username.length >= 6 || username.length === 0 ? undefined : 'error'"
+                :status="username.length >= 3 || username.length === 0 ? undefined : 'error'"
                 autocomplete="new-username"
               />
             </n-input-group>

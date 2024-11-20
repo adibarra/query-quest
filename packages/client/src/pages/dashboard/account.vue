@@ -10,6 +10,7 @@ useHead({
 
 const usernameModal = ref(false)
 const passwordModal = ref(false)
+const deleteModal = ref(false)
 </script>
 
 <template>
@@ -30,11 +31,17 @@ const passwordModal = ref(false)
         >
           Change Password
         </n-button>
+        <n-button
+          @click="deleteModal = true"
+        >
+          Delete Account
+        </n-button>
       </div>
     </div>
 
     <ChangeUsernameModal v-model="usernameModal" />
     <ChangePasswordModal v-model="passwordModal" />
+    <DeleteUserModal v-model="deleteModal" />
   </main>
 </template>
 

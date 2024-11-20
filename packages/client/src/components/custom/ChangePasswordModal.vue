@@ -7,6 +7,9 @@
 import { useMessage } from 'naive-ui'
 
 const isOpen = defineModel<boolean>()
+
+const quest = useAPI()
+const state = useStateStore()
 const message = useMessage()
 
 const password = ref('')
@@ -14,8 +17,32 @@ const confirmPassword = ref('')
 const error = ref('')
 
 async function changePassword(slotCloseFunc: any) {
-  message.success('Password changed successfully')
-  close(slotCloseFunc)
+  if (password.value.length < 6) {
+    error.value = 'Password must be at least 6 characters long.'
+    return
+  }
+
+  if (password.value !== confirmPassword.value) {
+    error.value = 'Passwords do not match.'
+    return
+  }
+
+  const response = await quest.updateUser({ password: password.value })
+  if (response.code === API_STATUS.OK) {
+    state.refreshUser()
+    message.success('Password changed successfully')
+    close(slotCloseFunc)
+    return
+  }
+
+  message.error('Failed to change password')
+  switch (response.code) {
+    case API_STATUS.BAD_REQUEST:
+      error.value = 'Your password is invalid.'
+      break
+    default:
+      error.value = 'An error occurred. Try again later.'
+  }
 }
 
 function close(slotCloseFunc: any) {
