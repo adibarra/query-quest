@@ -92,7 +92,7 @@ onMounted(async () => {
           v-for="question in filteredQuestions"
           :key="question.id"
           :title="question.question"
-          mb-4 grow rounded-md bg--c-secondary p-2 shadow-md
+          mb-4 rounded-md bg--c-secondary p-2 shadow-md
         >
           <div mt-auto h-full w-full flex flex-row justify-between>
             <div flex flex-col gap-2>
@@ -110,7 +110,7 @@ onMounted(async () => {
                     type="success"
                     size="small"
                   >
-                    {{ allTags.find((tag: Tag) => tag.id === tagID)!.name }}
+                    {{ allTags.find((tag: Tag) => tag.id === tagID)?.name }}
                   </NTag>
                 </div>
               </div>
