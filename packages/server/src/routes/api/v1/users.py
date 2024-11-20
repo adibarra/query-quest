@@ -88,21 +88,14 @@ def get_user(
 
 
 @router.patch(
-    "/users/{uuid}",
+    "/users",
     response_model=UserResponse,
     status_code=status.HTTP_200_OK,
 )
 def patch_user(
-    uuid: UUID4 = Path(...),
     data: UpdateUserRequest = Body(...),
     session: SessionDict = Depends(requireAuth),
 ):
-    if str(uuid) != session["user_uuid"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Forbidden: User does not have permission",
-        )
-
     try:
         if data.username is not None:
             Auth.validate_username(data.username)
@@ -115,7 +108,7 @@ def patch_user(
         )
 
     if not db.update_user(
-        str(uuid),
+        session["user_uuid"],
         username=data.username,
         password_hash=Auth.hash_password(data.password) if data.password else None,
     ):
@@ -124,27 +117,20 @@ def patch_user(
             detail="Conflict",
         )
 
-    user = db.get_user(uuid=str(uuid))
+    user = db.get_user(uuid=session["user_uuid"])
     user["password_hash"] = None
     return UserResponse(code=200, message="Ok", data=user)
 
 
 @router.delete(
-    "/users/{uuid}",
+    "/users",
     response_model=UserResponse,
     status_code=status.HTTP_200_OK,
 )
 def delete_user(
-    uuid: UUID4 = Path(...),
     session: SessionDict = Depends(requireAuth),
 ):
-    if str(uuid) != session["user_uuid"]:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Forbidden: User does not have permission",
-        )
-
-    if not db.delete_user(uuid=str(uuid)):
+    if not db.delete_user(uuid=session["user_uuid"]):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal Server Error",
