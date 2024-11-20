@@ -38,13 +38,13 @@ function loadRandomQuestion() {
 }
 
 onMounted(async () => {
-  quest.getTags().then(response => {
+  quest.getTags().then((response) => {
     if (response.code === API_STATUS.OK) {
       allTags.value = response.data
     }
   })
 
-  quest.getQuestions().then(response => {
+  quest.getQuestions().then((response) => {
     if (response.code === API_STATUS.OK) {
       allQuestions.value = response.data
     }
@@ -59,7 +59,7 @@ onMounted(async () => {
       Trivia Questions
     </span>
 
-    <div flex flex-row justify-between>
+    <div flex flex-row justify-between gap-2>
       <div max-w-md w-full flex flex-col gap-2>
         <label text--c-inverse font-medium>
           Search by tags:
@@ -74,7 +74,7 @@ onMounted(async () => {
 
       <NButton
         type="primary"
-        size="large"
+        size="medium"
         mt-auto max-w-100 bg--c-secondary text--c-inverse
         @click="loadRandomQuestion"
       >
@@ -87,16 +87,16 @@ onMounted(async () => {
         <n-spin size="large" />
       </div>
 
-      <div v-else-if="filteredQuestions.length">
+      <div v-else-if="filteredQuestions.length" flex flex-wrap gap-x4>
         <NCard
           v-for="question in filteredQuestions"
           :key="question.id"
           :title="question.question"
-          mb-4 rounded-md bg--c-secondary p-2 shadow-md
+          mb-4 grow rounded-md bg--c-secondary p-2 shadow-md
         >
-          <div flex flex-row justify-between>
+          <div mt-auto h-full w-full flex flex-row justify-between>
             <div flex flex-col gap-2>
-              <div flex>
+              <div mt-auto flex>
                 <span>Difficulty:</span>
                 <NRate :default-value="question.difficulty" readonly />
               </div>
@@ -119,7 +119,7 @@ onMounted(async () => {
             <NButton
               type="primary"
               size="medium"
-              bg--c-tertiary text--c-inverse
+              mt-auto bg--c-primary text--c-inverse
               @click="goToPlayPage(question.id)"
             >
               Play
