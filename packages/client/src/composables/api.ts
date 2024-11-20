@@ -47,7 +47,7 @@ export function useAPI(options?: { base?: string }) {
     POST_QUESTION, GET_QUESTION,
     GET_QUESTIONS,
     GET_TAGS,
-    GET_STATS,
+    GET_STATS, UPDATE_STATS,
     SUBMIT_ANSWER,
   }
 
@@ -63,6 +63,7 @@ export function useAPI(options?: { base?: string }) {
     [API_QUERY.GET_QUESTIONS]: 0,
     [API_QUERY.GET_TAGS]: 0,
     [API_QUERY.GET_STATS]: 0,
+    [API_QUERY.UPDATE_STATS]: 0,
     [API_QUERY.SUBMIT_ANSWER]: 0,
   }
 
@@ -214,13 +215,11 @@ export function useAPI(options?: { base?: string }) {
     },
     /**
      * Get the user's stats
-     * @param data
-     * @param data.uuid The user's uuid
      */
-    getStats: async (data: { uuid: string }): Promise<API_RESPONSE[API_QUERY.GET_STATS]> => {
+    getStats: async (): Promise<API_RESPONSE[API_QUERY.GET_STATS]> => {
       const requestTimestamp = Date.now()
 
-      const response = await useFetch(`${API_BASE}/stats/${data.uuid}`, {
+      const response = await useFetch(`${API_BASE}/statistics`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${session.value?.token}`,
@@ -231,6 +230,29 @@ export function useAPI(options?: { base?: string }) {
       if (requestTimestamp > latestCompletedTimestamps[API_QUERY.GET_STATS]) {
         latestCompletedTimestamps[API_QUERY.GET_STATS] = requestTimestamp
         return handleErrors<API_QUERY.GET_STATS>(response)
+      }
+      return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
+    },
+    /**
+     * Update the user's stats
+     * @param data
+     * @param data.correct If the user answered correctly
+     */
+    updateStats: async (data: { correct: boolean }): Promise<API_RESPONSE[API_QUERY.UPDATE_STATS]> => {
+      const requestTimestamp = Date.now()
+
+      const response = await useFetch(`${API_BASE}/statistics`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${session.value?.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(removeEmpty(data)),
+      }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.UPDATE_STATS]>()
+
+      if (requestTimestamp > latestCompletedTimestamps[API_QUERY.UPDATE_STATS]) {
+        latestCompletedTimestamps[API_QUERY.UPDATE_STATS] = requestTimestamp
+        return handleErrors<API_QUERY.UPDATE_STATS>(response)
       }
       return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
     },
@@ -322,30 +344,6 @@ export function useAPI(options?: { base?: string }) {
       }
       return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
     },
-    /**
-     * Submit an answer to a question
-     * @param data
-     * @param data.id The question's id
-     * @param data.answer The answer to the question
-     */
-    submitAnswer: async (data: { id: number, answer: string }): Promise<API_RESPONSE[API_QUERY.SUBMIT_ANSWER]> => {
-      const requestTimestamp = Date.now()
-
-      const response = await useFetch(`${API_BASE}/answers`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.value?.token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(removeEmpty(data)),
-      }, { timeout: 3333 }).json<API_RESPONSE[API_QUERY.SUBMIT_ANSWER]>()
-
-      if (requestTimestamp > latestCompletedTimestamps[API_QUERY.SUBMIT_ANSWER]) {
-        latestCompletedTimestamps[API_QUERY.SUBMIT_ANSWER] = requestTimestamp
-        return handleErrors<API_QUERY.SUBMIT_ANSWER>(response)
-      }
-      return { code: API_STATUS.OUTDATED, message: 'Request Outdated' }
-    },
   }
 
   function handleErrors<T extends keyof API_RESPONSE>(response: UseFetchReturn<API_RESPONSE[T]>): API_RESPONSE[T] {
@@ -385,6 +383,6 @@ export function useAPI(options?: { base?: string }) {
     [API_QUERY.GET_QUESTIONS]: ExpandRecursively<DataAPIResponse<Question[]> | BadAPIResponse>
     [API_QUERY.GET_TAGS]: ExpandRecursively<DataAPIResponse<Tag[]> | BadAPIResponse>
     [API_QUERY.GET_STATS]: ExpandRecursively<DataAPIResponse<Stats> | BadAPIResponse>
-    [API_QUERY.SUBMIT_ANSWER]: ExpandRecursively<DataAPIResponse<boolean> | BadAPIResponse>
+    [API_QUERY.UPDATE_STATS]: ExpandRecursively<DataAPIResponse<Stats> | BadAPIResponse>
   }
 }

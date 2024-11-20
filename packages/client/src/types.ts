@@ -34,6 +34,7 @@ export interface Tag {
 }
 
 export interface Stats {
+  user_uuid: string
   wins: number
   losses: number
   xp: number

@@ -28,8 +28,7 @@ export const useStateStore = defineStore('state', () => {
 
   async function refreshStats() {
     if (isAuthenticated.value) {
-      const uuid = quest.getSession()!.user_uuid
-      const response = await quest.getStats({ uuid })
+      const response = await quest.getStats()
       if (response.code === API_STATUS.OK) {
         stats.value = response.data
         return

@@ -49,6 +49,10 @@ function showOptions() {
 function selectAnswer(answer: string) {
   userAnswer.value = answer
   state.value = 'result'
+
+  quest.updateStats({
+    correct: !!isCorrect.value,
+  })
 }
 
 function getNextID() {
