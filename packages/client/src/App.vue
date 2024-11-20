@@ -9,7 +9,7 @@ useHead({
     {
       rel: 'icon',
       type: 'image/svg+xml',
-      href: () => preferredDark.value ? '/logo-dark.svg' : '/logo.svg',
+      href: '/favicon.svg',
     },
   ],
 })
