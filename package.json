@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.0",
   "private": true,
-  "packageManager": "pnpm@9.13.2",
+  "packageManager": "pnpm@9.14.2",
   "description": "CS.4347 Project: Query Quest - A trivia game",
   "contributors": [
     "adibarra <github@adibarra.com> (https://adibarra.com)"
@@ -12,9 +12,9 @@
     "build": "pnpm --parallel --color run build",
     "clean": "pnpm --parallel run clean",
     "clean:all": "pnpm --parallel run clean:all && rm -rf node_modules/ .pnpm-store/",
-    "dev": "pnpm -r run clean && pnpm --parallel --color run dev",
-    "dev:client": "pnpm -r run clean && pnpm --parallel --color --filter client run dev",
-    "dev:server": "pnpm -r run clean && pnpm --parallel --color --filter server run dev",
+    "dev": "pnpm --parallel --color run dev",
+    "dev:client": "pnpm --parallel --color --filter client run dev",
+    "dev:server": "pnpm --parallel --color --filter server run dev",
     "lint": "pnpm --parallel --color run lint; eslint . --cache; exit 0",
     "lint:fix": "pnpm --parallel --color run lint:fix; eslint . --fix --cache; exit 0",
     "preview": "pnpm -r run clean && pnpm --parallel --color run preview",
@@ -23,7 +23,7 @@
     "typecheck": "pnpm --parallel run typecheck"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^3.9.1",
+    "@antfu/eslint-config": "^3.9.2",
     "eslint": "^9.15.0",
     "eslint-plugin-format": "^0.1.2",
     "taze": "^0.18.0"
