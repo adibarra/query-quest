@@ -15,18 +15,7 @@ const quest = useAPI()
 
 const loading = ref(true)
 const allQuestions = ref<Question[]>([])
-const allTags = ref<Tag[]>([
-  { id: 1, name: 'Geography', description: '' },
-  { id: 2, name: 'Science', description: '' },
-  { id: 3, name: 'History', description: '' },
-  { id: 4, name: 'Literature', description: '' },
-  { id: 5, name: 'Mathematics', description: '' },
-  { id: 6, name: 'Art & Culture', description: '' },
-  { id: 7, name: 'Technology', description: '' },
-  { id: 8, name: 'Nature', description: '' },
-  { id: 9, name: 'Space', description: '' },
-  { id: 10, name: 'General', description: '' },
-])
+const allTags = ref<Tag[]>([])
 const tagOptions = computed(() => allTags.value.map(tag => ({ label: tag.name, value: tag.id })))
 
 const tagQuery = ref<number[]>([])
@@ -49,11 +38,18 @@ function loadRandomQuestion() {
 }
 
 onMounted(async () => {
-  const response = await quest.getQuestions()
-  if (response.code === API_STATUS.OK) {
-    allQuestions.value = response.data
+  quest.getTags().then(response => {
+    if (response.code === API_STATUS.OK) {
+      allTags.value = response.data
+    }
+  })
+
+  quest.getQuestions().then(response => {
+    if (response.code === API_STATUS.OK) {
+      allQuestions.value = response.data
+    }
     loading.value = false
-  }
+  })
 })
 </script>
 
