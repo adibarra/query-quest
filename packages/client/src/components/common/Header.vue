@@ -10,14 +10,8 @@
         <Logo />
       </div>
       <div grow />
-      <nav my-auto mr-5 flex gap-5 sm:text-xl>
-        <RouterLink
-          to="/"
-          title="Home"
-          qq-icon-btn
-        >
-          <div i-carbon:home />
-        </RouterLink>
+      <nav my-auto mr-5 flex gap-5 text-xl>
+        <HomeButton />
         <ThemeSwitch />
       </nav>
     </div>
