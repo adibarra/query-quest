@@ -13,6 +13,7 @@ from routes.api.health import router as api_health_router
 from routes.api.v1.question_tags import router as api_v1_question_tags_router
 from routes.api.v1.questions import router as api_v1_questions_router
 from routes.api.v1.sessions import router as api_v1_sessions_router
+from routes.api.v1.statistics import router as api_v1_statistics_router
 from routes.api.v1.tags import router as api_v1_tags_router
 from routes.api.v1.users import router as api_v1_users_router
 
@@ -51,6 +52,7 @@ app.include_router(api_health_router)
 app.include_router(api_v1_question_tags_router)
 app.include_router(api_v1_questions_router)
 app.include_router(api_v1_sessions_router)
+app.include_router(api_v1_statistics_router)
 app.include_router(api_v1_tags_router)
 app.include_router(api_v1_users_router)
 
