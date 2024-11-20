@@ -89,7 +89,7 @@ class StatisticsMixin:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO Statistics (user_uuid, xp, wins, losses)
+                    INSERT INTO Statistics (user_uuid)
                     VALUES (%s)
                     RETURNING *
                     """,
