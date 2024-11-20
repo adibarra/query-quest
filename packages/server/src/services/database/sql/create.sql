@@ -3,7 +3,7 @@
 -- Table that holds all trivia questions and relevant metadata
 CREATE TABLE IF NOT EXISTS Questions(
   id INTEGER GENERATED ALWAYS AS IDENTITY,
-  question VARCHAR(500) NOT NULL,
+  question VARCHAR(500) UNIQUE NOT NULL,
   difficulty SMALLINT NOT NULL,
   option1 VARCHAR(50) NOT NULL,
   option2 VARCHAR(50) NOT NULL,

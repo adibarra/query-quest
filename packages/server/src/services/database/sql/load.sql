@@ -44,7 +44,7 @@ VALUES
   ('Nature', 'Encompasses animals, plants, ecosystems, and natural phenomena.'),
   ('Space', 'Questions on planets, stars, galaxies, and space exploration.'),
   ('General', 'Broad category for pop culture, everyday knowledge, and trivia.')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (name) DO NOTHING;
 
 -- Seed some Questions into the Questions table
 INSERT INTO Questions (question, difficulty, option1, option2, option3, option4)
@@ -109,7 +109,7 @@ VALUES
   ('Which figure is said to have stolen fire for humanity in Greek mythology?', 2, 'Prometheus', 'Hermes', 'Hephaestus', 'Apollo'),
   ('What is the name of the female warriors in Greek mythology?', 3, 'Amazons', 'Furies', 'Nymphs', 'Harpies'),
   ('Who is the Celtic goddess of war and death?', 2, 'Morrigan', 'Brigid', 'Danu', 'Aine')
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (question) DO NOTHING;
 
 -- Seed some Question_Tags into the Question_Tags table
 INSERT INTO Question_Tags (question_id, tag_id)
