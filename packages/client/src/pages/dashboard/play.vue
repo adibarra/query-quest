@@ -129,6 +129,13 @@ watch(() => route.query.id, async () => {
         +{{ isCorrect ? 10 : 2 }} XP
       </div>
 
+      <div v-if="!isCorrect" mt-2 text-xl>
+        Correct Answer:
+        <span text-red-500 font-semibold>
+          {{ question?.options[0] }}
+        </span>
+      </div>
+
       <div mt-4 flex justify-center gap-4>
         <NButton type="default" size="large" @click="goToDashboard">
           Back to Dashboard
